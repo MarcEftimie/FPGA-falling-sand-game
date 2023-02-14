@@ -16,7 +16,6 @@ module sand_cell
 
     always_comb begin
         if (cell_status) begin
-            if ()
         end
     end
 

@@ -11,14 +11,14 @@ module falling_sand_game_top
     )(
         input wire clk_i, reset_i,
         output logic hsync_o, vsync_o,
-        output logic vga_red_o, vga_blue_o, vga_green_o
+        output logic [3:0] vga_red_o, vga_blue_o, vga_green_o
     );
 
     logic hsync, vsync;
     logic video_en;
-    logic [$clog2(ACTIVE_COLUMNS):0] pixel_x;
-    logic [$clog2(ACTIVE_ROWS):0] pixel_y;
-    logic [$clog2(ACTIVE_COLUMNS*ACTIVE_ROWS):0] pixel_count;
+    logic [$clog2(ACTIVE_COLUMNS)-1:0] pixel_x;
+    logic [$clog2(ACTIVE_ROWS)-1:0] pixel_y;
+    logic [$clog2(ACTIVE_COLUMNS*ACTIVE_ROWS)-1:0] pixel_count;
     
     sync_pulse_generator SYNC_PULSE_GENERATOR (
         .clk_i(clk_i),
@@ -32,13 +32,13 @@ module falling_sand_game_top
     );
 
     logic vram_write_en;
-    logic [$clog2(ACTIVE_COLUMNS*ACTIVE_ROWS):0] vram_write_address, vram_read_address;
+    logic [$clog2(ACTIVE_COLUMNS*ACTIVE_ROWS)-1:0] vram_write_address, vram_read_address;
     logic [VRAM_DATA_WIDTH-1:0] vram_write_data, vram_read_data;
 
     register_file #(
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
         .DATA_WIDTH(VRAM_DATA_WIDTH),
-        .ROM_FILE("vram.txt")
+        .ROM_FILE("vram.mem")
     ) VRAM_RAM (
         .clk_i(clk_i),
         .write_en(vram_write_en),
@@ -65,10 +65,15 @@ module falling_sand_game_top
     //     .read_data_o(game_read_data)
     // );
 
-    assign vga_red_o = video_en ? vram_read_data : 0;
-    assign vga_blue_o = video_en ? vram_read_data : 0;
-    assign vga_green_o = video_en ? vram_read_data : 0;
+    assign vram_write_en = 0;
     
-    assign vram_address = pixel_count;
+    assign hsync_o = hsync;
+    assign vsync_o = vsync;
+
+    assign vga_red_o = video_en ? {4{vram_read_data}} : 4'h0;
+    assign vga_blue_o = video_en ? {4{vram_read_data}} : 4'h0;
+    assign vga_green_o = video_en ? {4{vram_read_data}} : 4'h0;
+    
+    // assign vram_address = pixel_count;
 
 endmodule
