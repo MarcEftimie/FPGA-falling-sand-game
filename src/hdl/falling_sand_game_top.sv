@@ -6,7 +6,8 @@ module falling_sand_game_top
         parameter ACTIVE_COLUMNS = 640,
         parameter ACTIVE_ROWS = 480,
         parameter VRAM_DATA_WIDTH = 1,
-        parameter VRAM_ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS)
+        parameter VRAM_ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS),
+        parameter TICK_10_NS = 100000000
     )(
         input wire clk_i, reset_i,
         output logic hsync_o, vsync_o,
@@ -35,7 +36,7 @@ module falling_sand_game_top
         .ACTIVE_ROWS(ACTIVE_ROWS),
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
         .DATA_WIDTH(VRAM_DATA_WIDTH),
-        .FPS(1)
+        .TICK_10_NS(100000000)
     ) GAME_STATE_CONTROLLER (
         .clk_i(clk_i),
         .reset_i(reset_i),
@@ -47,8 +48,8 @@ module falling_sand_game_top
         .vram_write_address_o(vram_write_address),
         .ram_write_data_o(ram_write_data),
         .vram_write_data_o(vram_write_data),
-        .wr_ram_ena_o(ram_write_en),
-        .wr_vram_ena_o(vram_write_en)
+        .ram_write_ena_o(ram_write_en),
+        .vram_write_ena_o(vram_write_en)
     );
 
     logic vram_write_en;

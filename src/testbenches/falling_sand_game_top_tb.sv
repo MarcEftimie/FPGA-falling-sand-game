@@ -10,6 +10,7 @@ module falling_sand_game_top_tb;
     parameter VRAM_DATA_WIDTH = 1;
     parameter ACTIVE_COLUMNS = 640;
     parameter ACTIVE_ROWS = 480;
+    parameter TICK_10_NS = 400000;
     logic clk_i, reset_i;
     wire hsync_o, vsync_o;
     wire [3:0] vga_red_o, vga_blue_o, vga_green_o;
@@ -32,7 +33,7 @@ module falling_sand_game_top_tb;
         reset_i = 1;
         repeat(1) @(negedge clk_i);
         reset_i = 0;
-        repeat(7500000) @(negedge clk_i);
+        repeat(1700000) @(negedge clk_i);
         $finish;
     end
 
