@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module sand_cell
+module cells_next_state
     #(
         parameter ACTIVE_COLUMNS = 640,
         parameter ACTIVE_ROWS = 480,
@@ -20,12 +20,12 @@ module sand_cell
 
     typedef enum logic [2:0] {
         IDLE,
-        DELAY,
         PIXEL_EMPTY,
         PIXEL_DOWN,
         PIXEL_DOWN_LEFT,
         PIXEL_DOWN_RIGHT,
-        DELETE_PIXEL
+        DELETE_PIXEL,
+        DRAW
     } state_d;
 
     state_d state_reg, state_next;
@@ -62,8 +62,7 @@ module sand_cell
             end
             PIXEL_EMPTY : begin
                 if (base_address_reg == ACTIVE_COLUMNS*ACTIVE_ROWS) begin
-                    done = 1;
-                    state_next = IDLE;
+                    state_next = DRAW;
                 end else if (pixel_state_i == 0) begin
                     base_address_next = base_address_reg + 1;
                     read_address = base_address_next;
@@ -74,10 +73,38 @@ module sand_cell
                 end
             end
             PIXEL_DOWN : begin
-                if (pixel_state_i == 1) begin
-                    state_next = IDLE;
+                if ((base_address_reg + ACTIVE_COLUMNS) > (ACTIVE_COLUMNS*ACTIVE_ROWS)) begin
+                    base_address_next = base_address_reg + 1;
+                    read_address = base_address_next;
+                    state_next = PIXEL_EMPTY;
+                end else if (pixel_state_i == 1) begin
+                    read_address = base_address_next + ACTIVE_COLUMNS - 1;
+                    state_next = PIXEL_DOWN_LEFT;
                 end else begin
                     write_address = base_address_reg + ACTIVE_COLUMNS;
+                    write_data = 1;
+                    wr_ena = 1;
+                    state_next = DELETE_PIXEL;
+                end
+            end
+            PIXEL_DOWN_LEFT : begin
+                if (pixel_state_i == 1) begin
+                    read_address = base_address_next + ACTIVE_COLUMNS + 1;
+                    state_next = PIXEL_DOWN_RIGHT;
+                end else begin
+                    write_address = base_address_reg + ACTIVE_COLUMNS - 1;
+                    write_data = 1;
+                    wr_ena = 1;
+                    state_next = DELETE_PIXEL;
+                end
+            end
+            PIXEL_DOWN_RIGHT : begin
+                if (pixel_state_i == 1) begin
+                    base_address_next = base_address_reg + 1;
+                    read_address = base_address_next;
+                    state_next = PIXEL_EMPTY;
+                end else begin
+                    write_address = base_address_reg + ACTIVE_COLUMNS + 1;
                     write_data = 1;
                     wr_ena = 1;
                     state_next = DELETE_PIXEL;
@@ -90,6 +117,13 @@ module sand_cell
                 write_data = 0;
                 wr_ena = 1;
                 state_next = PIXEL_EMPTY;
+            end
+            DRAW : begin
+                write_address = 320;
+                write_data = 1;
+                wr_ena = 1;
+                done = 1;
+                state_next = IDLE;
             end
             default : state_next = IDLE;
         endcase

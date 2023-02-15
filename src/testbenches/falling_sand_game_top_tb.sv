@@ -19,7 +19,8 @@ module falling_sand_game_top_tb;
         .VRAM_ADDR_WIDTH(VRAM_ADDR_WIDTH),
         .VRAM_DATA_WIDTH(VRAM_DATA_WIDTH),
         .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
-        .ACTIVE_ROWS(ACTIVE_ROWS)
+        .ACTIVE_ROWS(ACTIVE_ROWS),
+        .TICK_10_NS(TICK_10_NS)
     ) UUT(
         .*
     );

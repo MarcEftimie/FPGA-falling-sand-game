@@ -36,7 +36,7 @@ module falling_sand_game_top
         .ACTIVE_ROWS(ACTIVE_ROWS),
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
         .DATA_WIDTH(VRAM_DATA_WIDTH),
-        .TICK_10_NS(100000000)
+        .TICK_10_NS(TICK_10_NS)
     ) GAME_STATE_CONTROLLER (
         .clk_i(clk_i),
         .reset_i(reset_i),

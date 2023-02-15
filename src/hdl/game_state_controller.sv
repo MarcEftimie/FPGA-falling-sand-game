@@ -19,29 +19,29 @@ module game_state_controller
 
     typedef enum logic [2:0] {
         IDLE,
-        DELAY,
         REDRAW_FRAME,
         WAIT,
-        WRITE_VRAM
+        WRITE_VRAM,
+        DRAW
     } state_d;
 
     state_d state_reg, state_next;
 
     logic [$clog2(TICK_10_NS)-1:0] tick_count_reg, tick_count_next;
 
-    logic [ADDR_WIDTH-1:0] write_vram_address_reg, write_vram_address_next;
-    logic [ADDR_WIDTH-1:0] read_ram_address;
+    logic [ADDR_WIDTH-1:0] vram_write_address_reg, vram_write_address_next;
+    logic [ADDR_WIDTH-1:0] ram_read_address;
     logic [DATA_WIDTH-1:0] vram_write_data;
     logic vram_write_ena;
 
     logic cell_redraw_ready, cell_redraw_done;
 
-    sand_cell #(
+    cells_next_state #(
         .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
         .ACTIVE_ROWS(ACTIVE_ROWS),
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
-    ) SAND_CELL (
+    ) CELLS_NEXT_STATE (
         .clk_i(clk_i),
         .reset_i(reset_i),
         .ready_i(cell_redraw_ready),
@@ -56,18 +56,18 @@ module game_state_controller
     always_ff @(posedge clk_i, posedge reset_i ) begin
         if (reset_i) begin
             state_reg <= IDLE;
-            write_vram_address_reg <= 0;
+            vram_write_address_reg <= 0;
             tick_count_reg <= 0;
         end else begin
             state_reg <= state_next;
-            write_vram_address_reg <= write_vram_address_next;
+            vram_write_address_reg <= vram_write_address_next;
             tick_count_reg <= tick_count_next;
         end
     end
 
     always_comb begin
         state_next = state_reg;
-        write_vram_address_next = write_vram_address_reg;
+        vram_write_address_next = vram_write_address_reg;
         tick_count_next = tick_count_reg;
         cell_redraw_ready = 0;
         vram_write_data = 0;
@@ -87,21 +87,21 @@ module game_state_controller
             WAIT : begin
                 if (tick_count_reg == ((TICK_10_NS))) begin // 100000000 - (ACTIVE_COLUMNS*ACTIVE_ROWS)
                     tick_count_next = 0;
-                    write_vram_address_next = 0;
-                    read_ram_address = write_vram_address_next;
+                    vram_write_address_next = 0;
+                    ram_read_address = vram_write_address_next;
                     state_next = WRITE_VRAM;
                 end else begin
                     tick_count_next = tick_count_reg + 1;
                 end
             end
             WRITE_VRAM : begin
-                if (write_vram_address_reg == ACTIVE_COLUMNS*ACTIVE_ROWS) begin
-                    write_vram_address_next = 0;
-                    read_ram_address = write_vram_address_next;
-                    state_next = IDLE;
+                if (vram_write_address_reg == ACTIVE_COLUMNS*ACTIVE_ROWS) begin
+                    vram_write_address_next = 0;
+                    ram_read_address = vram_write_address_next;
+                    state_next = DRAW;
                 end else begin
-                    write_vram_address_next = write_vram_address_reg + 1;
-                    read_ram_address = write_vram_address_next;
+                    vram_write_address_next = vram_write_address_reg + 1;
+                    ram_read_address = vram_write_address_next;
                     vram_write_data = ram_read_data_i;
                     vram_write_ena = 1;
                 end
@@ -110,8 +110,8 @@ module game_state_controller
         endcase
     end
 
-    assign ram_read_address_o = read_ram_address;
-    assign vram_write_address_o = write_vram_address_reg;
+    assign ram_read_address_o = ram_read_address;
+    assign vram_write_address_o = vram_write_address_reg;
     assign vram_write_data_o = vram_write_data;
     assign vram_write_ena_o = vram_write_ena;
 
