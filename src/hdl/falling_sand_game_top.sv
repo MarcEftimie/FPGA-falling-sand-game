@@ -30,11 +30,32 @@ module falling_sand_game_top
         .pixel_o(pixel_count)
     );
 
+    game_state_controller #(
+        .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
+        .ACTIVE_ROWS(ACTIVE_ROWS),
+        .ADDR_WIDTH(VRAM_ADDR_WIDTH),
+        .DATA_WIDTH(VRAM_DATA_WIDTH),
+        .FPS(1)
+    ) GAME_STATE_CONTROLLER (
+        .clk_i(clk_i),
+        .reset_i(reset_i),
+        .ram_read_data_i(ram_read_data),
+        .vram_read_data_i(vram_read_data_2),
+        .ram_read_address_o(ram_read_address),
+        .vram_read_address_o(vram_read_address),
+        .ram_write_address_o(ram_write_address),
+        .vram_write_address_o(vram_write_address),
+        .ram_write_data_o(ram_write_data),
+        .vram_write_data_o(vram_write_data),
+        .wr_ram_ena_o(ram_write_en),
+        .wr_vram_ena_o(vram_write_en)
+    );
+
     logic vram_write_en;
     logic [VRAM_ADDR_WIDTH-1:0] vram_write_address, vram_read_address;
-    logic [VRAM_DATA_WIDTH-1:0] vram_write_data, vram_read_data;
+    logic [VRAM_DATA_WIDTH-1:0] vram_write_data, vram_read_data_1, vram_read_data_2;
 
-    register_file #(
+    register_file_dual_port_read #(
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
         .DATA_WIDTH(VRAM_DATA_WIDTH),
         .ROM_FILE("vram.mem")
@@ -42,36 +63,36 @@ module falling_sand_game_top
         .clk_i(clk_i),
         .write_en(vram_write_en),
         .write_address_i(vram_write_address),
-        .read_address_i(pixel_count),
+        .read_address_1_i(pixel_count),
+        .read_address_2_i(vram_read_address),
         .write_data_i(vram_write_data),
-        .read_data_o(vram_read_data)
+        .read_data_1_o(vram_read_data_1),
+        .read_data_2_o(vram_read_data_2)
     );
 
-    // logic game_write_en;
-    // logic [$clog2(ACTIVE_COLUMNS*ACTIVE_ROWS):0] game_write_address, game_read_address;
-    // logic [VRAM_DATA_WIDTH-1:0] game_write_data, game_read_data;
+    logic ram_write_en;
+    logic [VRAM_ADDR_WIDTH-1:0] ram_write_address, ram_read_address;
+    logic [VRAM_DATA_WIDTH-1:0] ram_write_data, ram_read_data;
 
-    // register_file #(
-    //     .ADDR_WIDTH(VRAM_ADDR_WIDTH),
-    //     .DATA_WIDTH(VRAM_DATA_WIDTH),
-    //     .ROM_FILE("game.txt")
-    // ) GAME_RAM (
-    //     .clk_i(clk_i),
-    //     .write_en(game_write_en),
-    //     .write_address_i(game_write_address),
-    //     .read_address_i(game_read_address),
-    //     .write_data_i(game_write_data),
-    //     .read_data_o(game_read_data)
-    // );
+    register_file #(
+        .ADDR_WIDTH(VRAM_ADDR_WIDTH),
+        .DATA_WIDTH(VRAM_DATA_WIDTH),
+        .ROM_FILE("vram.mem")
+    ) GAME_STATE_RAM (
+        .clk_i(clk_i),
+        .write_en(ram_write_en),
+        .write_address_i(ram_write_address),
+        .read_address_i(ram_read_address),
+        .write_data_i(ram_write_data),
+        .read_data_o(ram_read_data)
+    );
 
-    assign vram_write_en = 0;
-    
     assign hsync_o = hsync;
     assign vsync_o = vsync;
 
-    assign vga_red_o = video_en ? {4{vram_read_data}} : 4'h0;
-    assign vga_blue_o = video_en ? {4{vram_read_data}} : 4'h0;
-    assign vga_green_o = video_en ? {4{vram_read_data}} : 4'h0;
+    assign vga_red_o = video_en ? {4{vram_read_data_1}} : 4'h0;
+    assign vga_blue_o = video_en ? {4{vram_read_data_1}} : 4'h0;
+    assign vga_green_o = video_en ? {4{vram_read_data_1}} : 4'h0;
     
     // assign vram_address = pixel_count;
 

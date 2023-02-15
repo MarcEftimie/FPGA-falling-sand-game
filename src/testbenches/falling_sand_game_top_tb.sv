@@ -32,6 +32,7 @@ module falling_sand_game_top_tb;
         reset_i = 1;
         repeat(1) @(negedge clk_i);
         reset_i = 0;
+        repeat(7500000) @(negedge clk_i);
         $finish;
     end
 
