@@ -7,7 +7,9 @@ module ps2_tx
         input wire tx_en_i,
         inout wire ps2d_io, ps2c_io,
         input wire [7:0] tx_data_i,
-        output logic idle_o, done_o
+        output logic idle_o, done_o,
+        output logic [2:0] state_o,
+        output logic [3:0] bit_count_o
     );
 
     // Declarations
@@ -25,12 +27,24 @@ module ps2_tx
     logic filter_ps2c_reg, filter_ps2c_next;
     logic falling_edge;
 
-    logic [7:0] tx_data_reg, tx_data_next;
+    logic [8:0] tx_data_reg, tx_data_next;
     logic ps2d_tri, ps2c_tri;
     logic ps2d, ps2c;
+    logic parity;
 
     logic [12:0] delay_count_reg, delay_count_next;
     logic [3:0] bit_count_reg, bit_count_next;
+    
+    //////
+    logic tx_en;
+    debouncer DEBOUNCER(
+        .clk_i(clk_i),
+        .btn_i(tx_en_i),
+        .pulse_o(tx_en)
+    );
+    assign state_o = state_reg;
+    assign bit_count_o = bit_count_reg;
+    //////
 
     // Registers
     always_ff @(posedge clk_i, posedge reset_i) begin
@@ -66,10 +80,10 @@ module ps2_tx
         done_o = 0;
         case (state_reg)
             IDLE : begin
-                if (tx_en_i) begin
-                    delay_count_next = 13'h1FFF;
-                    bit_count_next = 8;
-                    tx_data_next = tx_data_i;
+                if (tx_en) begin
+                    delay_count_next = 13'h1FFF; //1FFF
+                    bit_count_next = 4'b1000;
+                    tx_data_next = {parity, tx_data_i};
                     state_next = REQUEST_TO_SEND;
                 end else begin
                     idle_o = 1;
@@ -94,7 +108,7 @@ module ps2_tx
                 ps2d_tri = 1;
                 ps2d = tx_data_reg[0];
                 if (falling_edge) begin
-                    tx_data_next = tx_data_reg >> 1;
+                    tx_data_next = {1'b0, tx_data_reg[8:1]};
                     if (bit_count_reg == 0) begin
                         state_next = STOP;
                     end else begin
@@ -118,6 +132,8 @@ module ps2_tx
     assign filter_ps2c_next = &filter_reg ? 1'b1 :
                               |filter_reg ? 1'b0 : filter_ps2c_reg;
     assign falling_edge = filter_ps2c_next & ~filter_ps2c_reg;
+
+    assign parity = ~(^tx_data_i);
 
     // Outputs
     assign ps2d_io = ps2d_tri ? ps2d : 1'bz;

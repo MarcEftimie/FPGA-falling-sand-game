@@ -1,14 +1,14 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module p2s_rxtx
+module ps2_rxtx
     (
         input wire clk_i, reset_i,
         input wire tx_en_i,
-        input logic [7:0] tx_data_i,
+        input wire [7:0] tx_data_i,
         inout wire ps2d_io, ps2c_io,
         output logic [7:0] rx_data_o,
-        output wire rx_done_o, tx_done_o
+        output logic rx_done_o, tx_done_o
     );
 
     // Declarations

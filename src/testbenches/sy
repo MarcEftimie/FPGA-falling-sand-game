@@ -1,95 +1,72 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Thu Feb 16 04:21:49 2023
+[*] Fri Feb 17 15:43:33 2023
 [*]
-[dumpfile] "/home/marc/projects/FPGA_Falling_Sand_Game/src/falling_sand_game_top.fst"
-[dumpfile_mtime] "Thu Feb 16 04:18:53 2023"
-[dumpfile_size] 11479997
+[dumpfile] "/home/marc/projects/FPGA_Falling_Sand_Game/src/ps2_rxtx.fst"
+[dumpfile_mtime] "Fri Feb 17 15:42:56 2023"
+[dumpfile_size] 1252
 [savefile] "/home/marc/projects/FPGA_Falling_Sand_Game/src/testbenches/sy"
-[timestart] 16800009210
+[timestart] 0
 [size] 1846 1016
 [pos] -1 -1
-*-13.138752 16800016060 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
-[treeopen] falling_sand_game_top_tb.
-[treeopen] falling_sand_game_top_tb.UUT.
-[treeopen] falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.
+*-15.138752 155800 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] ps2_rxtx_tb.
+[treeopen] ps2_rxtx_tb.UUT.
 [sst_width] 233
 [signals_width] 318
 [sst_expanded] 1
 [sst_vpaned_height] 415
+@28
+ps2_rxtx_tb.UUT.clk_i
+ps2_rxtx_tb.UUT.ps2c_io
+ps2_rxtx_tb.UUT.ps2d_io
+ps2_rxtx_tb.UUT.reset_i
+@22
+ps2_rxtx_tb.UUT.rx_data_o[7:0]
+@28
+ps2_rxtx_tb.UUT.rx_done_o
+@22
+ps2_rxtx_tb.UUT.tx_data_i[7:0]
+@28
+ps2_rxtx_tb.UUT.tx_done_o
+ps2_rxtx_tb.UUT.tx_en_i
+ps2_rxtx_tb.UUT.tx_idle
 @200
--MAIN
-@25
-falling_sand_game_top_tb.UUT.clk_i
-falling_sand_game_top_tb.UUT.hsync
-falling_sand_game_top_tb.UUT.hsync_o
-falling_sand_game_top_tb.UUT.pixel_count[18:0]
-falling_sand_game_top_tb.UUT.pixel_x[9:0]
-falling_sand_game_top_tb.UUT.pixel_y[8:0]
-falling_sand_game_top_tb.UUT.ram_rd_address[18:0]
-falling_sand_game_top_tb.UUT.ram_rd_data
-falling_sand_game_top_tb.UUT.ram_wr_address[18:0]
-falling_sand_game_top_tb.UUT.ram_wr_data
-falling_sand_game_top_tb.UUT.ram_wr_en
-falling_sand_game_top_tb.UUT.reset_i
-falling_sand_game_top_tb.UUT.vga_blue_o[3:0]
-falling_sand_game_top_tb.UUT.vga_green_o[3:0]
-falling_sand_game_top_tb.UUT.vga_red_o[3:0]
-falling_sand_game_top_tb.UUT.video_en
-falling_sand_game_top_tb.UUT.vram_rd_address[18:0]
-falling_sand_game_top_tb.UUT.vram_rd_data_1
-falling_sand_game_top_tb.UUT.vram_rd_data_2
-falling_sand_game_top_tb.UUT.vram_wr_address[18:0]
-falling_sand_game_top_tb.UUT.vram_wr_data
-falling_sand_game_top_tb.UUT.vram_wr_en
-falling_sand_game_top_tb.UUT.vsync
-falling_sand_game_top_tb.UUT.vsync_o
-@205
--GAME CONTROLLER
-@25
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.cell_redraw_done
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.cell_redraw_ready
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.clk_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_rd_address[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_rd_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_rd_data_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_wr_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_wr_data_o
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_wr_en_o
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.reset_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.state_next[2:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.state_reg[2:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.tick_count_next[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.tick_count_reg[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_rd_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_rd_data_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_address_next[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_address_reg[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_data
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_data_o
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_en
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_en_o
-@205
--CELL
-@25
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.base_address_next[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.base_address_reg[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.clk_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.done
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.done_o
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.pixel_state_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.rd_address[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.rd_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.ready_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.reset_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.state_next[2:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.state_reg[2:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_address[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_data
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_data_o
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_en
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_en_o
+-fdsf
+@23
+ps2_rxtx_tb.UUT.PS2_TX.bit_count_next[3:0]
+ps2_rxtx_tb.UUT.PS2_TX.bit_count_reg[3:0]
+@29
+ps2_rxtx_tb.UUT.PS2_TX.clk_i
+@23
+ps2_rxtx_tb.UUT.PS2_TX.delay_count_next[12:0]
+ps2_rxtx_tb.UUT.PS2_TX.delay_count_reg[12:0]
+@29
+ps2_rxtx_tb.UUT.PS2_TX.done_o
+ps2_rxtx_tb.UUT.PS2_TX.falling_edge
+@23
+ps2_rxtx_tb.UUT.PS2_TX.filter_next[7:0]
+@29
+ps2_rxtx_tb.UUT.PS2_TX.filter_ps2c_next
+ps2_rxtx_tb.UUT.PS2_TX.filter_ps2c_reg
+@23
+ps2_rxtx_tb.UUT.PS2_TX.filter_reg[7:0]
+@29
+ps2_rxtx_tb.UUT.PS2_TX.idle_o
+ps2_rxtx_tb.UUT.PS2_TX.ps2c
+ps2_rxtx_tb.UUT.PS2_TX.ps2c_io
+ps2_rxtx_tb.UUT.PS2_TX.ps2c_tri
+ps2_rxtx_tb.UUT.PS2_TX.ps2d
+ps2_rxtx_tb.UUT.PS2_TX.ps2d_io
+ps2_rxtx_tb.UUT.PS2_TX.ps2d_tri
+ps2_rxtx_tb.UUT.PS2_TX.reset_i
+ps2_rxtx_tb.UUT.PS2_TX.state_next[2:0]
+ps2_rxtx_tb.UUT.PS2_TX.state_reg[2:0]
+@23
+ps2_rxtx_tb.UUT.PS2_TX.tx_data_i[7:0]
+ps2_rxtx_tb.UUT.PS2_TX.tx_data_next[7:0]
+ps2_rxtx_tb.UUT.PS2_TX.tx_data_reg[7:0]
+@29
+ps2_rxtx_tb.UUT.PS2_TX.tx_en_i
 [pattern_trace] 1
 [pattern_trace] 0
