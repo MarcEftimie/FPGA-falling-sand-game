@@ -8,16 +8,16 @@ module register_file
         parameter ROM_FILE = "zeros.mem"
     ) (
         input wire clk_i,
-        input wire write_en,
-        input wire [ADDR_WIDTH-1:0] write_address_i, read_address_i,
-        input wire [DATA_WIDTH-1:0] write_data_i,
-        output logic [DATA_WIDTH-1:0] read_data_o
+        input wire wr_en,
+        input wire [ADDR_WIDTH-1:0] wr_address_i, rd_address_i,
+        input wire [DATA_WIDTH-1:0] wr_data_i,
+        output logic [DATA_WIDTH-1:0] rd_data_o
     );
 
 
     // Declarations
     logic [DATA_WIDTH-1:0] ram [0:307200-1];
-    logic [DATA_WIDTH-1:0] read_data;
+    logic [DATA_WIDTH-1:0] rd_data;
 
     initial begin
         $readmemb({"./mem/", ROM_FILE}, ram);
@@ -25,13 +25,13 @@ module register_file
 
     // Registers
     always_ff @(posedge clk_i) begin
-        if (write_en) begin
-            ram[write_address_i] <= write_data_i;
+        if (wr_en) begin
+            ram[wr_address_i] <= wr_data_i;
         end
-        read_data <= ram[read_address_i];
+        rd_data <= ram[rd_address_i];
     end
 
     // Output Logic
-    assign read_data_o = read_data;
+    assign rd_data_o = rd_data;
 
 endmodule

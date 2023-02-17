@@ -11,10 +11,10 @@ module cells_next_state
         input wire clk_i, reset_i,
         input wire ready_i,
         input wire [DATA_WIDTH-1:0] pixel_state_i,
-        output logic [ADDR_WIDTH-1:0] read_address_o,
-        output logic [ADDR_WIDTH-1:0] write_address_o,
-        output logic [DATA_WIDTH-1:0] write_data_o,
-        output logic wr_ena_o,
+        output logic [ADDR_WIDTH-1:0] rd_address_o,
+        output logic [ADDR_WIDTH-1:0] wr_address_o,
+        output logic [DATA_WIDTH-1:0] wr_data_o,
+        output logic wr_en_o,
         output logic done_o
     );
 
@@ -31,9 +31,9 @@ module cells_next_state
     state_d state_reg, state_next;
 
     logic [ADDR_WIDTH-1:0] base_address_reg, base_address_next;
-    logic [ADDR_WIDTH-1:0] read_address, write_address;
-    logic [DATA_WIDTH-1:0] write_data;
-    logic wr_ena, done;
+    logic [ADDR_WIDTH-1:0] rd_address, wr_address;
+    logic [DATA_WIDTH-1:0] wr_data;
+    logic wr_en, done;
 
     always_ff @(posedge clk_i, posedge reset_i ) begin
         if (reset_i) begin
@@ -48,15 +48,15 @@ module cells_next_state
     always_comb begin
         state_next = state_reg;
         base_address_next = base_address_reg;
-        write_address = 0;
-        write_data = 0;
-        wr_ena = 0;
+        wr_address = 0;
+        wr_data = 0;
+        wr_en = 0;
         done = 0;
         case (state_reg)
             IDLE : begin
                 if (ready_i) begin
                     base_address_next = 0;
-                    read_address = base_address_next;
+                    rd_address = base_address_next;
                     state_next = PIXEL_EMPTY;
                 end
             end
@@ -65,63 +65,63 @@ module cells_next_state
                     state_next = DRAW;
                 end else if (pixel_state_i == 0) begin
                     base_address_next = base_address_reg + 1;
-                    read_address = base_address_next;
+                    rd_address = base_address_next;
                     state_next = PIXEL_EMPTY;
                 end else begin
-                    read_address = base_address_next + ACTIVE_COLUMNS;
+                    rd_address = base_address_next + ACTIVE_COLUMNS;
                     state_next = PIXEL_DOWN;
                 end
             end
             PIXEL_DOWN : begin
                 if ((base_address_reg + ACTIVE_COLUMNS) > (ACTIVE_COLUMNS*ACTIVE_ROWS)) begin
                     base_address_next = base_address_reg + 1;
-                    read_address = base_address_next;
+                    rd_address = base_address_next;
                     state_next = PIXEL_EMPTY;
                 end else if (pixel_state_i == 1) begin
-                    read_address = base_address_next + ACTIVE_COLUMNS - 1;
+                    rd_address = base_address_next + ACTIVE_COLUMNS - 1;
                     state_next = PIXEL_DOWN_LEFT;
                 end else begin
-                    write_address = base_address_reg + ACTIVE_COLUMNS;
-                    write_data = 1;
-                    wr_ena = 1;
+                    wr_address = base_address_reg + ACTIVE_COLUMNS;
+                    wr_data = 1;
+                    wr_en = 1;
                     state_next = DELETE_PIXEL;
                 end
             end
             PIXEL_DOWN_LEFT : begin
                 if (pixel_state_i == 1) begin
-                    read_address = base_address_next + ACTIVE_COLUMNS + 1;
+                    rd_address = base_address_next + ACTIVE_COLUMNS + 1;
                     state_next = PIXEL_DOWN_RIGHT;
                 end else begin
-                    write_address = base_address_reg + ACTIVE_COLUMNS - 1;
-                    write_data = 1;
-                    wr_ena = 1;
+                    wr_address = base_address_reg + ACTIVE_COLUMNS - 1;
+                    wr_data = 1;
+                    wr_en = 1;
                     state_next = DELETE_PIXEL;
                 end
             end
             PIXEL_DOWN_RIGHT : begin
                 if (pixel_state_i == 1) begin
                     base_address_next = base_address_reg + 1;
-                    read_address = base_address_next;
+                    rd_address = base_address_next;
                     state_next = PIXEL_EMPTY;
                 end else begin
-                    write_address = base_address_reg + ACTIVE_COLUMNS + 1;
-                    write_data = 1;
-                    wr_ena = 1;
+                    wr_address = base_address_reg + ACTIVE_COLUMNS + 1;
+                    wr_data = 1;
+                    wr_en = 1;
                     state_next = DELETE_PIXEL;
                 end
             end
             DELETE_PIXEL : begin
                 base_address_next = base_address_reg + 1;
-                read_address = base_address_next;
-                write_address = base_address_reg;
-                write_data = 0;
-                wr_ena = 1;
+                rd_address = base_address_next;
+                wr_address = base_address_reg;
+                wr_data = 0;
+                wr_en = 1;
                 state_next = PIXEL_EMPTY;
             end
             DRAW : begin
-                write_address = 320;
-                write_data = 1;
-                wr_ena = 1;
+                wr_address = 320;
+                wr_data = 1;
+                wr_en = 1;
                 done = 1;
                 state_next = IDLE;
             end
@@ -129,10 +129,10 @@ module cells_next_state
         endcase
     end
 
-    assign read_address_o = read_address;
-    assign write_address_o = write_address;
-    assign write_data_o = write_data;
-    assign wr_ena_o = wr_ena;
+    assign rd_address_o = rd_address;
+    assign wr_address_o = wr_address;
+    assign wr_data_o = wr_data;
+    assign wr_en_o = wr_en;
     assign done_o = done;
 
 endmodule

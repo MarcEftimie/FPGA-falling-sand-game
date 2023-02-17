@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Wed Feb 15 22:37:13 2023
+[*] Thu Feb 16 04:21:49 2023
 [*]
 [dumpfile] "/home/marc/projects/FPGA_Falling_Sand_Game/src/falling_sand_game_top.fst"
-[dumpfile_mtime] "Wed Feb 15 22:33:28 2023"
-[dumpfile_size] 11477324
+[dumpfile_mtime] "Thu Feb 16 04:18:53 2023"
+[dumpfile_size] 11479997
 [savefile] "/home/marc/projects/FPGA_Falling_Sand_Game/src/testbenches/sy"
-[timestart] 7075063300
+[timestart] 16800009210
 [size] 1846 1016
 [pos] -1 -1
-*-16.138752 7075258800 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-13.138752 16800016060 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] falling_sand_game_top_tb.
 [treeopen] falling_sand_game_top_tb.UUT.
 [treeopen] falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.
@@ -19,58 +19,58 @@
 [sst_vpaned_height] 415
 @200
 -MAIN
-@24
+@25
 falling_sand_game_top_tb.UUT.clk_i
 falling_sand_game_top_tb.UUT.hsync
 falling_sand_game_top_tb.UUT.hsync_o
 falling_sand_game_top_tb.UUT.pixel_count[18:0]
 falling_sand_game_top_tb.UUT.pixel_x[9:0]
 falling_sand_game_top_tb.UUT.pixel_y[8:0]
-falling_sand_game_top_tb.UUT.ram_read_address[18:0]
-falling_sand_game_top_tb.UUT.ram_read_data
-falling_sand_game_top_tb.UUT.ram_write_address[18:0]
-falling_sand_game_top_tb.UUT.ram_write_data
-falling_sand_game_top_tb.UUT.ram_write_en
+falling_sand_game_top_tb.UUT.ram_rd_address[18:0]
+falling_sand_game_top_tb.UUT.ram_rd_data
+falling_sand_game_top_tb.UUT.ram_wr_address[18:0]
+falling_sand_game_top_tb.UUT.ram_wr_data
+falling_sand_game_top_tb.UUT.ram_wr_en
 falling_sand_game_top_tb.UUT.reset_i
 falling_sand_game_top_tb.UUT.vga_blue_o[3:0]
 falling_sand_game_top_tb.UUT.vga_green_o[3:0]
 falling_sand_game_top_tb.UUT.vga_red_o[3:0]
 falling_sand_game_top_tb.UUT.video_en
-falling_sand_game_top_tb.UUT.vram_read_address[18:0]
-falling_sand_game_top_tb.UUT.vram_read_data_1
-falling_sand_game_top_tb.UUT.vram_read_data_2
-falling_sand_game_top_tb.UUT.vram_write_address[18:0]
-falling_sand_game_top_tb.UUT.vram_write_data
-falling_sand_game_top_tb.UUT.vram_write_en
+falling_sand_game_top_tb.UUT.vram_rd_address[18:0]
+falling_sand_game_top_tb.UUT.vram_rd_data_1
+falling_sand_game_top_tb.UUT.vram_rd_data_2
+falling_sand_game_top_tb.UUT.vram_wr_address[18:0]
+falling_sand_game_top_tb.UUT.vram_wr_data
+falling_sand_game_top_tb.UUT.vram_wr_en
 falling_sand_game_top_tb.UUT.vsync
 falling_sand_game_top_tb.UUT.vsync_o
-@200
+@205
 -GAME CONTROLLER
-@24
+@25
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.cell_redraw_done
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.cell_redraw_ready
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.clk_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_read_address[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_read_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_read_data_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_write_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_write_data_o
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_write_ena_o
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_rd_address[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_rd_address_o[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_rd_data_i
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_wr_address_o[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_wr_data_o
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.ram_wr_en_o
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.reset_i
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.state_next[2:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.state_reg[2:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.tick_count_next[18:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.tick_count_reg[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_read_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_read_data_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_write_address_next[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_write_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_write_address_reg[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_write_data
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_write_data_o
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_write_ena
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_write_ena_o
-@200
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_rd_address_o[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_rd_data_i
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_address_next[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_address_o[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_address_reg[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_data
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_data_o
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_en
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_en_o
+@205
 -CELL
 @25
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.base_address_next[18:0]
@@ -79,17 +79,17 @@ falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.clk_i
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.done
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.done_o
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.pixel_state_i
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.read_address[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.read_address_o[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.rd_address[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.rd_address_o[18:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.ready_i
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.reset_i
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.state_next[2:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.state_reg[2:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_ena
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_ena_o
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.write_address[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.write_address_o[18:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.write_data
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.write_data_o
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_address[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_address_o[18:0]
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_data
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_data_o
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_en
+falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.wr_en_o
 [pattern_trace] 1
 [pattern_trace] 0

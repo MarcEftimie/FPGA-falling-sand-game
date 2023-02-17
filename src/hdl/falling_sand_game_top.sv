@@ -40,21 +40,21 @@ module falling_sand_game_top
     ) GAME_STATE_CONTROLLER (
         .clk_i(clk_i),
         .reset_i(reset_i),
-        .ram_read_data_i(ram_read_data),
-        .vram_read_data_i(vram_read_data_2),
-        .ram_read_address_o(ram_read_address),
-        .vram_read_address_o(vram_read_address),
-        .ram_write_address_o(ram_write_address),
-        .vram_write_address_o(vram_write_address),
-        .ram_write_data_o(ram_write_data),
-        .vram_write_data_o(vram_write_data),
-        .ram_write_ena_o(ram_write_en),
-        .vram_write_ena_o(vram_write_en)
+        .ram_rd_data_i(ram_rd_data),
+        .vram_rd_data_i(vram_rd_data_2),
+        .ram_rd_address_o(ram_rd_address),
+        .vram_rd_address_o(vram_rd_address),
+        .ram_wr_address_o(ram_wr_address),
+        .vram_wr_address_o(vram_wr_address),
+        .ram_wr_data_o(ram_wr_data),
+        .vram_wr_data_o(vram_wr_data),
+        .ram_wr_en_o(ram_wr_en),
+        .vram_wr_en_o(vram_wr_en)
     );
 
-    logic vram_write_en;
-    logic [VRAM_ADDR_WIDTH-1:0] vram_write_address, vram_read_address;
-    logic [VRAM_DATA_WIDTH-1:0] vram_write_data, vram_read_data_1, vram_read_data_2;
+    logic vram_wr_en;
+    logic [VRAM_ADDR_WIDTH-1:0] vram_wr_address, vram_rd_address;
+    logic [VRAM_DATA_WIDTH-1:0] vram_wr_data, vram_rd_data_1, vram_rd_data_2;
 
     register_file_dual_port_read #(
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
@@ -62,18 +62,18 @@ module falling_sand_game_top
         .ROM_FILE("vram.mem")
     ) VRAM_RAM (
         .clk_i(clk_i),
-        .write_en(vram_write_en),
-        .write_address_i(vram_write_address),
-        .read_address_1_i(pixel_count),
-        .read_address_2_i(vram_read_address),
-        .write_data_i(vram_write_data),
-        .read_data_1_o(vram_read_data_1),
-        .read_data_2_o(vram_read_data_2)
+        .wr_en(vram_wr_en),
+        .wr_address_i(vram_wr_address),
+        .rd_address_1_i(pixel_count),
+        .rd_address_2_i(vram_rd_address),
+        .wr_data_i(vram_wr_data),
+        .rd_data_1_o(vram_rd_data_1),
+        .rd_data_2_o(vram_rd_data_2)
     );
 
-    logic ram_write_en;
-    logic [VRAM_ADDR_WIDTH-1:0] ram_write_address, ram_read_address;
-    logic [VRAM_DATA_WIDTH-1:0] ram_write_data, ram_read_data;
+    logic ram_wr_en;
+    logic [VRAM_ADDR_WIDTH-1:0] ram_wr_address, ram_rd_address;
+    logic [VRAM_DATA_WIDTH-1:0] ram_wr_data, ram_rd_data;
 
     register_file #(
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
@@ -81,19 +81,19 @@ module falling_sand_game_top
         .ROM_FILE("vram.mem")
     ) GAME_STATE_RAM (
         .clk_i(clk_i),
-        .write_en(ram_write_en),
-        .write_address_i(ram_write_address),
-        .read_address_i(ram_read_address),
-        .write_data_i(ram_write_data),
-        .read_data_o(ram_read_data)
+        .wr_en(ram_wr_en),
+        .wr_address_i(ram_wr_address),
+        .rd_address_i(ram_rd_address),
+        .wr_data_i(ram_wr_data),
+        .rd_data_o(ram_rd_data)
     );
 
     assign hsync_o = hsync;
     assign vsync_o = vsync;
 
-    assign vga_red_o = video_en ? {4{vram_read_data_1}} : 4'h0;
-    assign vga_blue_o = video_en ? {4{vram_read_data_1}} : 4'h0;
-    assign vga_green_o = video_en ? {4{vram_read_data_1}} : 4'h0;
+    assign vga_red_o = video_en ? {4{vram_rd_data_1}} : 4'h0;
+    assign vga_blue_o = video_en ? {4{vram_rd_data_1}} : 4'h0;
+    assign vga_green_o = video_en ? {4{vram_rd_data_1}} : 4'h0;
     
     // assign vram_address = pixel_count;
 
