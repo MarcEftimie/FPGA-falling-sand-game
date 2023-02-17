@@ -7,11 +7,19 @@ module falling_sand_game_top
         parameter ACTIVE_ROWS = 480,
         parameter VRAM_DATA_WIDTH = 1,
         parameter VRAM_ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS),
-        parameter TICK_10_NS = 100000000
+        parameter TICK_10_NS = 10000000
     )(
         input wire clk_i, reset_i,
+        input wire [2:0] sw_i,
         output logic hsync_o, vsync_o,
         output logic [3:0] vga_red_o, vga_blue_o, vga_green_o
+    );
+
+    logic [26:0] tick_10_ns;
+
+    tick_speed_controller TICK_SPEED_CONTROLLER (
+        .controller_i(sw_i),
+        .tick_delay_o(tick_10_ns)
     );
 
     logic hsync, vsync;
@@ -35,11 +43,11 @@ module falling_sand_game_top
         .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
         .ACTIVE_ROWS(ACTIVE_ROWS),
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
-        .DATA_WIDTH(VRAM_DATA_WIDTH),
-        .TICK_10_NS(TICK_10_NS)
+        .DATA_WIDTH(VRAM_DATA_WIDTH)
     ) GAME_STATE_CONTROLLER (
         .clk_i(clk_i),
         .reset_i(reset_i),
+<<<<<<< HEAD
         .ram_rd_data_i(ram_rd_data),
         .vram_rd_data_i(vram_rd_data_2),
         .ram_rd_address_o(ram_rd_address),
@@ -50,6 +58,19 @@ module falling_sand_game_top
         .vram_wr_data_o(vram_wr_data),
         .ram_wr_en_o(ram_wr_en),
         .vram_wr_en_o(vram_wr_en)
+=======
+        .tick_10_ns(tick_10_ns),
+        .ram_read_data_i(ram_read_data),
+        .vram_read_data_i(vram_read_data_2),
+        .ram_read_address_o(ram_read_address),
+        .vram_read_address_o(vram_read_address),
+        .ram_write_address_o(ram_write_address),
+        .vram_write_address_o(vram_write_address),
+        .ram_write_data_o(ram_write_data),
+        .vram_write_data_o(vram_write_data),
+        .ram_write_ena_o(ram_write_en),
+        .vram_write_ena_o(vram_write_en)
+>>>>>>> 36138a31fa4aa9acc9f48023afbdf2316c6ec871
     );
 
     logic vram_wr_en;

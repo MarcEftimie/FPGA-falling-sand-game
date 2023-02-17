@@ -6,15 +6,23 @@ module game_state_controller
         parameter ACTIVE_COLUMNS = 640,
         parameter ACTIVE_ROWS = 480,
         parameter ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS),
-        parameter DATA_WIDTH = 1,
-        parameter TICK_10_NS = 100000000 //100000000
+        parameter DATA_WIDTH = 1
     )(
         input wire clk_i, reset_i,
+<<<<<<< HEAD
         input wire [DATA_WIDTH-1:0] ram_rd_data_i, vram_rd_data_i,
         output logic [ADDR_WIDTH-1:0] ram_rd_address_o, vram_rd_address_o,
         output logic [ADDR_WIDTH-1:0] ram_wr_address_o, vram_wr_address_o,
         output logic [DATA_WIDTH-1:0] ram_wr_data_o, vram_wr_data_o,
         output logic ram_wr_en_o, vram_wr_en_o
+=======
+        input wire [26:0] tick_10_ns,
+        input wire [DATA_WIDTH-1:0] ram_read_data_i, vram_read_data_i,
+        output logic [ADDR_WIDTH-1:0] ram_read_address_o, vram_read_address_o,
+        output logic [ADDR_WIDTH-1:0] ram_write_address_o, vram_write_address_o,
+        output logic [DATA_WIDTH-1:0] ram_write_data_o, vram_write_data_o,
+        output logic ram_write_ena_o, vram_write_ena_o
+>>>>>>> 36138a31fa4aa9acc9f48023afbdf2316c6ec871
     );
 
     typedef enum logic [2:0] {
@@ -27,7 +35,7 @@ module game_state_controller
 
     state_d state_reg, state_next;
 
-    logic [$clog2(TICK_10_NS)-1:0] tick_count_reg, tick_count_next;
+    logic [26:0] tick_count_reg, tick_count_next;
 
     logic [ADDR_WIDTH-1:0] vram_wr_address_reg, vram_wr_address_next;
     logic [ADDR_WIDTH-1:0] ram_rd_address;
@@ -85,7 +93,7 @@ module game_state_controller
                 end
             end
             WAIT : begin
-                if (tick_count_reg == ((TICK_10_NS))) begin // 100000000 - (ACTIVE_COLUMNS*ACTIVE_ROWS)
+                if (tick_count_reg == tick_10_ns) begin // 100000000 - (ACTIVE_COLUMNS*ACTIVE_ROWS)
                     tick_count_next = 0;
                     vram_wr_address_next = 0;
                     ram_rd_address = vram_wr_address_next;
