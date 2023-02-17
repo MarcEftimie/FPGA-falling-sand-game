@@ -9,6 +9,7 @@ module game_state_controller
         parameter DATA_WIDTH = 1
     )(
         input wire clk_i, reset_i,
+        input wire [26:0] tick_10_ns,
         input wire [DATA_WIDTH-1:0] ram_rd_data_i, vram_rd_data_i,
         output logic [ADDR_WIDTH-1:0] ram_rd_address_o, vram_rd_address_o,
         output logic [ADDR_WIDTH-1:0] ram_wr_address_o, vram_wr_address_o,

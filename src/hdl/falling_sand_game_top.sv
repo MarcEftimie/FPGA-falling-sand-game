@@ -47,7 +47,7 @@ module falling_sand_game_top
     ) GAME_STATE_CONTROLLER (
         .clk_i(clk_i),
         .reset_i(reset_i),
-<<<<<<< HEAD
+        .tick_10_ns(tick_10_ns),
         .ram_rd_data_i(ram_rd_data),
         .vram_rd_data_i(vram_rd_data_2),
         .ram_rd_address_o(ram_rd_address),
@@ -58,19 +58,6 @@ module falling_sand_game_top
         .vram_wr_data_o(vram_wr_data),
         .ram_wr_en_o(ram_wr_en),
         .vram_wr_en_o(vram_wr_en)
-=======
-        .tick_10_ns(tick_10_ns),
-        .ram_read_data_i(ram_read_data),
-        .vram_read_data_i(vram_read_data_2),
-        .ram_read_address_o(ram_read_address),
-        .vram_read_address_o(vram_read_address),
-        .ram_write_address_o(ram_write_address),
-        .vram_write_address_o(vram_write_address),
-        .ram_write_data_o(ram_write_data),
-        .vram_write_data_o(vram_write_data),
-        .ram_write_ena_o(ram_write_en),
-        .vram_write_ena_o(vram_write_en)
->>>>>>> 36138a31fa4aa9acc9f48023afbdf2316c6ec871
     );
 
     logic vram_wr_en;
