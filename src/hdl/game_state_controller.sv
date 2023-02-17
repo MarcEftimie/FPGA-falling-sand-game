@@ -9,20 +9,11 @@ module game_state_controller
         parameter DATA_WIDTH = 1
     )(
         input wire clk_i, reset_i,
-<<<<<<< HEAD
         input wire [DATA_WIDTH-1:0] ram_rd_data_i, vram_rd_data_i,
         output logic [ADDR_WIDTH-1:0] ram_rd_address_o, vram_rd_address_o,
         output logic [ADDR_WIDTH-1:0] ram_wr_address_o, vram_wr_address_o,
         output logic [DATA_WIDTH-1:0] ram_wr_data_o, vram_wr_data_o,
         output logic ram_wr_en_o, vram_wr_en_o
-=======
-        input wire [26:0] tick_10_ns,
-        input wire [DATA_WIDTH-1:0] ram_read_data_i, vram_read_data_i,
-        output logic [ADDR_WIDTH-1:0] ram_read_address_o, vram_read_address_o,
-        output logic [ADDR_WIDTH-1:0] ram_write_address_o, vram_write_address_o,
-        output logic [DATA_WIDTH-1:0] ram_write_data_o, vram_write_data_o,
-        output logic ram_write_ena_o, vram_write_ena_o
->>>>>>> 36138a31fa4aa9acc9f48023afbdf2316c6ec871
     );
 
     typedef enum logic [2:0] {
