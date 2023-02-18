@@ -5,7 +5,7 @@ module mouse
     (
         input wire clk_i, reset_i,
         inout wire ps2d_io, ps2c_io,
-        output logic [8:0] x_o, y_o,
+        output logic [8:0] x_velocity_o, y_velocity_o,
         output logic [7:0] btn_o,
         output logic done_o,
         output logic [2:0] state_o
@@ -42,21 +42,21 @@ module mouse
         .tx_done_o(tx_done)
     );
 
-    logic [8:0] x_mouse_pos_reg, x_mouse_pos_next;
-    logic [8:0] y_mouse_pos_reg, y_mouse_pos_next;
+    logic [8:0] x_velocity_reg, x_velocity_next;
+    logic [8:0] y_velocity_reg, y_velocity_next;
     logic [7:0] btn_mouse_reg, btn_mouse_next;
 
     // Registers
     always_ff @(posedge clk_i, posedge reset_i) begin
         if (reset_i) begin
             state_reg <= SEND_INIT_PACKET;
-            x_mouse_pos_reg <= 0;
-            y_mouse_pos_reg <= 0;
+            x_velocity_reg <= 0;
+            y_velocity_reg <= 0;
             btn_mouse_reg <= 0;
         end else begin
             state_reg <= state_next;
-            x_mouse_pos_reg <= x_mouse_pos_next;
-            y_mouse_pos_reg <= y_mouse_pos_next;
+            x_velocity_reg <= x_velocity_next;
+            y_velocity_reg <= y_velocity_next;
             btn_mouse_reg <= btn_mouse_next;
         end
     end
@@ -66,8 +66,8 @@ module mouse
         state_next = state_reg;
         tx_en = 0;
         done_o = 0;
-        x_mouse_pos_next = x_mouse_pos_reg;
-        y_mouse_pos_next = y_mouse_pos_reg;
+        x_velocity_next = x_velocity_reg;
+        y_velocity_next = y_velocity_reg;
         btn_mouse_next = btn_mouse_reg;
         case (state_reg)
             SEND_INIT_PACKET : begin
@@ -86,23 +86,21 @@ module mouse
             end
             RECEIVE_PACKET_1 : begin
                 if (rx_done) begin
-                    x_mouse_pos_next[8] = rx_data[4];
-                    y_mouse_pos_next[8] = rx_data[5];
+                    x_velocity_next[8] = rx_data[4];
+                    y_velocity_next[8] = rx_data[5];
                     btn_mouse_next = rx_data[7:0];
                     state_next = RECEIVE_PACKET_2;
                 end
             end
             RECEIVE_PACKET_2 : begin
                 if (rx_done) begin
-                    x_mouse_pos_next[7:0] = rx_data;
-                    // btn_mouse_next = rx_data[7:0];
+                    x_velocity_next[7:0] = rx_data;
                     state_next = RECEIVE_PACKET_3;
                 end
             end
             RECEIVE_PACKET_3 : begin
                 if (rx_done) begin
-                    y_mouse_pos_next[7:0] = rx_data;
-                    // btn_mouse_next = rx_data[7:0];
+                    y_velocity_next[7:0] = rx_data;
                     state_next = DONE;
                 end
             end
@@ -119,8 +117,8 @@ module mouse
     assign tx_data = 8'hF4;
 
     // Outputs
-    assign x_o = x_mouse_pos_reg;
-    assign y_o = y_mouse_pos_reg;
+    assign x_velocity_o = x_velocity_reg;
+    assign y_velocity_o = y_velocity_reg;
     assign btn_o = btn_mouse_reg;
 
 endmodule
