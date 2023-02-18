@@ -53,8 +53,8 @@ module ps2_rx
         case (state_reg)
             IDLE : begin
                 if (rx_en_i & falling_edge) begin
-                    bit_count_next = 8;
-                    rx_data_next = 0;
+                    rx_data_next = {ps2d_i, rx_data_reg[10:1]};
+                    bit_count_next = 4'b1001;
                     state_next = DATA;
                 end
             end
@@ -72,16 +72,13 @@ module ps2_rx
                 done_o = 1;
                 state_next = IDLE;
             end
-            default : begin
-                state_next = IDLE;
-            end
         endcase
     end
 
     assign filter_next = {ps2c_i, filter_reg[7:1]};
-    assign filter_ps2c_next = &filter_reg ? 1'b1 :
-                              |filter_reg ? 1'b0 : filter_ps2c_reg;
-    assign falling_edge = filter_ps2c_next & ~filter_ps2c_reg;
+    assign filter_ps2c_next = (filter_reg==8'b11111111) ? 1'b1 :
+                              (filter_reg==8'b00000000) ? 1'b0 : filter_ps2c_reg;
+    assign falling_edge = filter_ps2c_reg & ~filter_ps2c_next;
 
     // Outputs
     assign rx_data_o = rx_data_reg[8:1];

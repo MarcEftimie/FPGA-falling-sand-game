@@ -7,9 +7,7 @@ module ps2_tx
         input wire tx_en_i,
         inout wire ps2d_io, ps2c_io,
         input wire [7:0] tx_data_i,
-        output logic idle_o, done_o,
-        output logic [2:0] state_o,
-        output logic [3:0] bit_count_o
+        output logic idle_o, done_o
     );
 
     // Declarations

@@ -6,8 +6,9 @@ module mouse
         input wire clk_i, reset_i,
         inout wire ps2d_io, ps2c_io,
         output logic [8:0] x_o, y_o,
-        output logic [2:0] btn_o,
-        output logic done_o
+        output logic [7:0] btn_o,
+        output logic done_o,
+        output logic [2:0] state_o
     );
 
     // Declarations
@@ -22,6 +23,8 @@ module mouse
     } state_d;
 
     state_d state_reg, state_next;
+
+    assign state_o = state_reg;
 
     logic tx_en;
     logic [7:0] rx_data, tx_data;
@@ -41,7 +44,7 @@ module mouse
 
     logic [8:0] x_mouse_pos_reg, x_mouse_pos_next;
     logic [8:0] y_mouse_pos_reg, y_mouse_pos_next;
-    logic [2:0] btn_mouse_reg, btn_mouse_next;
+    logic [7:0] btn_mouse_reg, btn_mouse_next;
 
     // Registers
     always_ff @(posedge clk_i, posedge reset_i) begin
@@ -85,19 +88,21 @@ module mouse
                 if (rx_done) begin
                     x_mouse_pos_next[8] = rx_data[4];
                     y_mouse_pos_next[8] = rx_data[5];
-                    btn_mouse_next = rx_data[2:0];
+                    btn_mouse_next = rx_data[7:0];
                     state_next = RECEIVE_PACKET_2;
                 end
             end
             RECEIVE_PACKET_2 : begin
                 if (rx_done) begin
                     x_mouse_pos_next[7:0] = rx_data;
+                    // btn_mouse_next = rx_data[7:0];
                     state_next = RECEIVE_PACKET_3;
                 end
             end
             RECEIVE_PACKET_3 : begin
                 if (rx_done) begin
                     y_mouse_pos_next[7:0] = rx_data;
+                    // btn_mouse_next = rx_data[7:0];
                     state_next = DONE;
                 end
             end
