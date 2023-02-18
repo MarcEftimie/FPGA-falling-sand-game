@@ -61,7 +61,7 @@ test_cells_next_state : testbenches/cells_next_state_tb.sv hdl/*
 test_game_state_controller : testbenches/game_state_controller_tb.sv hdl/*
 	${IVERILOG} $^ -o game_state_controller_tb.bin && ${VVP} game_state_controller_tb.bin ${VVP_POST} && gtkwave game_state_controller.fst -a testbenches/sy
 
-test_ps2_tx : testbenches/ps2_tx_tb.sv hdl/ps2_tx.sv
+test_ps2_tx : testbenches/ps2_tx_tb.sv hdl/ps2_tx.sv hdl/debouncer.sv
 	${IVERILOG} $^ -o ps2_tx_tb.bin && ${VVP} ps2_tx_tb.bin ${VVP_POST} && gtkwave ps2_tx.fst -a testbenches/sy
 
 test_UART_TX : testbenches/UART_TX_tb.sv hdl/*

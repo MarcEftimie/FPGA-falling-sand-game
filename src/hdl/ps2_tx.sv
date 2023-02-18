@@ -36,14 +36,14 @@ module ps2_tx
     logic [3:0] bit_count_reg, bit_count_next;
     
     //////
-    logic tx_en;
-    debouncer DEBOUNCER(
-        .clk_i(clk_i),
-        .btn_i(tx_en_i),
-        .pulse_o(tx_en)
-    );
-    assign state_o = state_reg;
-    assign bit_count_o = bit_count_reg;
+    logic tx_en = tx_en_i;
+    // debouncer DEBOUNCER(
+    //     .clk_i(clk_i),
+    //     .btn_i(tx_en_i),
+    //     .pulse_o(tx_en)
+    // );
+    // assign state_o = state_reg;
+    // assign bit_count_o = bit_count_reg;
     //////
 
     // Registers
@@ -80,13 +80,12 @@ module ps2_tx
         done_o = 0;
         case (state_reg)
             IDLE : begin
+                idle_o = 1;
                 if (tx_en) begin
-                    delay_count_next = 13'h1FFF; //1FFF
+                    delay_count_next = 14'h11111111111111; //1FFF
                     bit_count_next = 4'b1000;
                     tx_data_next = {parity, tx_data_i};
                     state_next = REQUEST_TO_SEND;
-                end else begin
-                    idle_o = 1;
                 end
             end
             REQUEST_TO_SEND : begin
@@ -128,10 +127,10 @@ module ps2_tx
         endcase
     end
 
-    assign filter_next = {ps2c, filter_reg[7:1]};
-    assign filter_ps2c_next = &filter_reg ? 1'b1 :
-                              |filter_reg ? 1'b0 : filter_ps2c_reg;
-    assign falling_edge = filter_ps2c_next & ~filter_ps2c_reg;
+    assign filter_next = {ps2c_io, filter_reg[7:1]};
+    assign filter_ps2c_next = (filter_reg==8'b11111111) ? 1'b1 :
+                              (filter_reg==8'b00000000) ? 1'b0 : filter_ps2c_reg;
+    assign falling_edge = ~filter_ps2c_next & filter_ps2c_reg;
 
     assign parity = ~(^tx_data_i);
 

@@ -10,6 +10,8 @@ module ps2_tx_tb;
     logic tx_en_i;
     logic [7:0] tx_data_i;
     wire idle_o, done_o;
+    wire [2:0] state_o;
+    wire [3:0] bit_count_o;
 
     ps2_tx #(
     ) UUT(
