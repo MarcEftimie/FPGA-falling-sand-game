@@ -11,6 +11,7 @@ module falling_sand_game_top
     )(
         input wire clk_i, reset_i,
         input wire [2:0] sw_i,
+        inout wire ps2d_io, ps2c_io,
         output logic hsync_o, vsync_o,
         output logic [3:0] vga_red_o, vga_blue_o, vga_green_o
     );
@@ -22,7 +23,6 @@ module falling_sand_game_top
         .tick_delay_o(tick_10_ns)
     );
 
-    logic hsync, vsync;
     logic video_en;
     logic [$clog2(ACTIVE_COLUMNS)-1:0] pixel_x;
     logic [$clog2(ACTIVE_ROWS)-1:0] pixel_y;
@@ -31,8 +31,8 @@ module falling_sand_game_top
     sync_pulse_generator SYNC_PULSE_GENERATOR (
         .clk_i(clk_i),
         .reset_i(reset_i),
-        .hsync_o(hsync),
-        .vsync_o(vsync),
+        .hsync_o(hsync_o),
+        .vsync_o(vsync_o),
         .video_en_o(video_en),
         .x_o(pixel_x),
         .y_o(pixel_y),
@@ -96,11 +96,54 @@ module falling_sand_game_top
         .rd_data_o(ram_rd_data)
     );
 
-    assign hsync_o = hsync;
-    assign vsync_o = vsync;
+    logic [8:0] mouse_x_velocity, mouse_y_velocity;
+    logic [2:0] mouse_btn;
+    logic mouse_done;
 
-    assign vga_red_o = video_en ? {4{vram_rd_data_1}} : 4'h0;
-    assign vga_blue_o = video_en ? {4{vram_rd_data_1}} : 4'h0;
+    mouse_controller MOUSE(
+        .clk_i(clk_i),
+        .reset_i(reset_i),
+        .ps2d_io(ps2d_io),
+        .ps2c_io(ps2c_io),
+        .x_velocity_o(mouse_x_velocity),
+        .y_velocity_o(mouse_y_velocity),
+        .btn_o(mouse_btn),
+        .done_o(mouse_done)
+    );
+
+    logic [$clog2(ACTIVE_COLUMNS)-1:0] mouse_x_position;
+    logic [$clog2(ACTIVE_ROWS)-1:0] mouse_y_position;
+
+    mouse_position_tracker #(
+        .COLUMNS(ACTIVE_COLUMNS),
+        .ROWS(ACTIVE_ROWS)
+    ) MOUSE_POSITION_TRACKER (
+        .clk_i(clk_i),
+        .reset_i(reset_i),
+        .x_velocity_i(mouse_x_velocity),
+        .y_velocity_i(mouse_y_velocity),
+        .en_i(mouse_done),
+        .x_position_o(mouse_x_position),
+        .y_position_o(mouse_y_position)
+    );
+
+    logic cursor_draw;
+
+    mouse_cursor_drawer #(
+        .COLUMNS(ACTIVE_COLUMNS),
+        .ROWS(ACTIVE_ROWS)
+    ) MOUSE_CURSOR_DRAWER (
+        .clk_i(clk_i),
+        .reset_i(reset_i),
+        .mouse_x_position_i(mouse_x_position),
+        .mouse_y_position_i(mouse_y_position),
+        .pixel_x(pixel_x),
+        .pixel_y(pixel_y),
+        .cursor_draw_o(cursor_draw)
+    );
+
+    assign vga_red_o = video_en ? cursor_draw {4{vram_rd_data_1}} : 4'h0;
+    assign vga_blue_o = video_en ? cursor_draw {4{vram_rd_data_1}} : 4'h0;
     assign vga_green_o = video_en ? {4{vram_rd_data_1}} : 4'h0;
     
     // assign vram_address = pixel_count;

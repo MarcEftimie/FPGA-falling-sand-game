@@ -1,14 +1,13 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module mouse
+module mouse_controller
     (
         input wire clk_i, reset_i,
         inout wire ps2d_io, ps2c_io,
         output logic [8:0] x_velocity_o, y_velocity_o,
-        output logic [7:0] btn_o,
-        output logic done_o,
-        output logic [2:0] state_o
+        output logic [2:0] btn_o,
+        output logic done_o
     );
 
     // Declarations
@@ -23,8 +22,6 @@ module mouse
     } state_d;
 
     state_d state_reg, state_next;
-
-    assign state_o = state_reg;
 
     logic tx_en;
     logic [7:0] rx_data, tx_data;
@@ -44,7 +41,7 @@ module mouse
 
     logic [8:0] x_velocity_reg, x_velocity_next;
     logic [8:0] y_velocity_reg, y_velocity_next;
-    logic [7:0] btn_mouse_reg, btn_mouse_next;
+    logic [2:0] btn_mouse_reg, btn_mouse_next;
 
     // Registers
     always_ff @(posedge clk_i, posedge reset_i) begin
@@ -88,7 +85,7 @@ module mouse
                 if (rx_done) begin
                     x_velocity_next[8] = rx_data[4];
                     y_velocity_next[8] = rx_data[5];
-                    btn_mouse_next = rx_data[7:0];
+                    btn_mouse_next = rx_data[2:0];
                     state_next = RECEIVE_PACKET_2;
                 end
             end
