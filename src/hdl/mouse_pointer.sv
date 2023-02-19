@@ -30,8 +30,24 @@ module mouse_position_tracker
         x_position_next = x_position_reg;
         y_position_next = y_position_reg;
         if (update_position_i) begin
-            x_position_next = x_position_reg + x_velocity_i;
-            y_position_next = y_position_reg + y_velocity_i;
+            if (x_velocity_i[8]) begin
+                if ((~({1'b1, x_velocity_i}) + 1) > x_position_reg) begin
+                    x_position_next = 0;
+                end else if ((x_position_reg + {1'b1, x_velocity_i}) > 639) begin
+                    x_position_next = 639;
+                end else begin
+                    x_position_next = x_position_reg + x_velocity_i;
+                end
+            end
+            if (y_velocity_i[8]) begin
+                if ((~y_velocity_i + 1) > y_position_reg) begin
+                    y_position_next = 0;
+                end else if ((y_position_reg + y_velocity_i) > 479) begin
+                    y_position_next = 479;
+                end else begin
+                    y_position_next = y_position_reg + y_velocity_i;
+                end
+            end
         end
     end
 
