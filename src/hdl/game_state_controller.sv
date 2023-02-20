@@ -10,11 +10,13 @@ module game_state_controller
     )(
         input wire clk_i, reset_i,
         input wire [26:0] tick_10_ns,
+        input wire draw_en_i,
         input wire [DATA_WIDTH-1:0] ram_rd_data_i, vram_rd_data_i,
         output logic [ADDR_WIDTH-1:0] ram_rd_address_o, vram_rd_address_o,
         output logic [ADDR_WIDTH-1:0] ram_wr_address_o, vram_wr_address_o,
         output logic [DATA_WIDTH-1:0] ram_wr_data_o, vram_wr_data_o,
-        output logic ram_wr_en_o, vram_wr_en_o
+        output logic ram_wr_en_o, vram_wr_en_o,
+        output logic draw_en_o
     );
 
     typedef enum logic [2:0] {
@@ -72,6 +74,7 @@ module game_state_controller
         cell_redraw_ready = 0;
         vram_wr_data = 0;
         vram_wr_en = 0;
+        draw_en_o = 0;
         case (state_reg)
             IDLE : begin
                 tick_count_next = 0;
@@ -92,6 +95,9 @@ module game_state_controller
                     state_next = WRITE_VRAM;
                 end else begin
                     tick_count_next = tick_count_reg + 1;
+                    if (draw_en_i) begin
+                        draw_en_o = 1;
+                    end
                 end
             end
             WRITE_VRAM : begin

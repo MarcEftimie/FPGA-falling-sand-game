@@ -39,6 +39,10 @@ module falling_sand_game_top
         .pixel_o(pixel_count)
     );
 
+    logic gst_ram_wr_en;
+    logic [VRAM_ADDR_WIDTH-1:0] gst_ram_wr_address;
+    logic [DATA_WIDTH-1:0] gst_ram_wr_data;
+
     game_state_controller #(
         .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
         .ACTIVE_ROWS(ACTIVE_ROWS),
@@ -48,16 +52,18 @@ module falling_sand_game_top
         .clk_i(clk_i),
         .reset_i(reset_i),
         .tick_10_ns(tick_10_ns),
+        .draw_en_i(mouse_btn[0]),
         .ram_rd_data_i(ram_rd_data),
         .vram_rd_data_i(vram_rd_data_2),
         .ram_rd_address_o(ram_rd_address),
         .vram_rd_address_o(vram_rd_address),
-        .ram_wr_address_o(ram_wr_address),
+        .ram_wr_address_o(gst_ram_wr_address),
         .vram_wr_address_o(vram_wr_address),
-        .ram_wr_data_o(ram_wr_data),
+        .ram_wr_data_o(gst_ram_wr_data),
         .vram_wr_data_o(vram_wr_data),
-        .ram_wr_en_o(ram_wr_en),
-        .vram_wr_en_o(vram_wr_en)
+        .ram_wr_en_o(gst_ram_wr_en),
+        .vram_wr_en_o(vram_wr_en),
+        .draw_en_o(cursor_draw_en)
     );
 
     logic vram_wr_en;
@@ -141,6 +147,27 @@ module falling_sand_game_top
         .pixel_y_i(pixel_y),
         .cursor_draw_o(cursor_draw)
     );
+
+    logic cursor_draw_en;
+    logic [VRAM_ADDR_WIDTH-1:0] mpd_ram_wr_address;
+    logic mpd_ram_wr_en;
+
+    mouse_pixel_drawer #(
+        .COLUMNS(ACTIVE_COLUMNS),
+        .ROWS(ACTIVE_ROWS)
+    ) MOUSE_PIXEL_DRAWER (
+        .clk_i(clk_i),
+        .reset_i(reset_i),
+        .draw_en_i(cursor_draw_en),
+        .mouse_x_position_i(mouse_x_position),
+        .mouse_y_position_i(mouse_y_position),
+        .ram_wr_address_o(mpd_ram_wr_address),
+        .ram_wr_en_o(mpd_ram_wr_en)
+    );
+
+    assign ram_wr_address = cursor_draw_en ? mpd_ram_wr_address : gst_ram_wr_address;
+    assign ram_wr_data = cursor_draw_en ? 1'b1 : gst_ram_wr_data;
+    assign ram_wr_en = cursor_draw_en ? mpd_ram_wr_en : gst_ram_wr_en;
 
     assign vga_red_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
     assign vga_blue_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
