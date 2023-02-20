@@ -12,7 +12,7 @@ clean:
 	rm -f *.bin *.vcd *.fst vivado*.log *.jou vivado*.str *.log *.checkpoint *.bit *.html *.xml *.out
 	rm -rf .Xil
 
-program_fpga_vivado: $(SRCS) $(MAIN_MEMSMEMORIES) main.bit build.tcl program.tcl Basys-3-Master.xdc
+program_fpga_vivado: $(SRCS) $(MAIN_MEMSMEMORIES) build.tcl program.tcl Basys-3-Master.xdc
 	@echo "########################################"
 	@echo "#### Building FPGA bitstream        ####"
 	@echo "########################################"

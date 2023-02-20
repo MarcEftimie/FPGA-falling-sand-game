@@ -137,15 +137,13 @@ module falling_sand_game_top
         .reset_i(reset_i),
         .mouse_x_position_i(mouse_x_position),
         .mouse_y_position_i(mouse_y_position),
-        .pixel_x(pixel_x),
-        .pixel_y(pixel_y),
+        .pixel_x_i(pixel_x),
+        .pixel_y_i(pixel_y),
         .cursor_draw_o(cursor_draw)
     );
 
-    assign vga_red_o = video_en ? cursor_draw {4{vram_rd_data_1}} : 4'h0;
-    assign vga_blue_o = video_en ? cursor_draw {4{vram_rd_data_1}} : 4'h0;
-    assign vga_green_o = video_en ? {4{vram_rd_data_1}} : 4'h0;
-    
-    // assign vram_address = pixel_count;
+    assign vga_red_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
+    assign vga_blue_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
+    assign vga_green_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
 
 endmodule

@@ -12,7 +12,10 @@ module mouse_cursor_drawer #(
         output logic cursor_draw_o
     );
 
-    assign cursor_draw_o = ((mouse_x_position_i == pixel_x_i) 
-                            && (mouse_y_position_i == pixel_y_i)) ? 1'b1 : 1'b0;
+    assign cursor_draw_o = ((mouse_x_position_i == pixel_x_i) && (mouse_y_position_i == pixel_y_i)) ? 1'b1 :
+                           ((mouse_x_position_i - 1 == pixel_x_i) && (mouse_y_position_i == pixel_y_i)) ? 1'b1 :
+                           ((mouse_x_position_i + 1 == pixel_x_i) && (mouse_y_position_i == pixel_y_i)) ? 1'b1 :
+                           ((mouse_x_position_i == pixel_x_i) && (mouse_y_position_i + 1 == pixel_y_i)) ? 1'b1 :
+                           ((mouse_x_position_i == pixel_x_i) && (mouse_y_position_i - 1 == pixel_y_i)) ? 1'b1 : 1'b0;
 
 endmodule

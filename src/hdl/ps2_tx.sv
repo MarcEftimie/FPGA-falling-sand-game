@@ -30,7 +30,7 @@ module ps2_tx
     logic ps2d, ps2c;
     logic parity;
 
-    logic [12:0] delay_count_reg, delay_count_next;
+    logic [13:0] delay_count_reg, delay_count_next;
     logic [3:0] bit_count_reg, bit_count_next;
     
     //////
@@ -80,7 +80,7 @@ module ps2_tx
             IDLE : begin
                 idle_o = 1;
                 if (tx_en) begin
-                    delay_count_next = 14'h11111111111111; //1FFF
+                    delay_count_next = 14'b11111111111111; //1FFF
                     bit_count_next = 4'b1000;
                     tx_data_next = {parity, tx_data_i};
                     state_next = REQUEST_TO_SEND;
