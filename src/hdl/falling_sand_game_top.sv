@@ -13,7 +13,8 @@ module falling_sand_game_top
         input wire [2:0] sw_i,
         inout wire ps2d_io, ps2c_io,
         output logic hsync_o, vsync_o,
-        output logic [3:0] vga_red_o, vga_blue_o, vga_green_o
+        output logic [3:0] vga_red_o, vga_blue_o, vga_green_o,
+        output logic [15:0] led_o
     );
 
     logic [26:0] tick_10_ns;
@@ -41,7 +42,7 @@ module falling_sand_game_top
 
     logic gst_ram_wr_en;
     logic [VRAM_ADDR_WIDTH-1:0] gst_ram_wr_address;
-    logic [DATA_WIDTH-1:0] gst_ram_wr_data;
+    logic [VRAM_DATA_WIDTH-1:0] gst_ram_wr_data;
 
     game_state_controller #(
         .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
@@ -149,7 +150,8 @@ module falling_sand_game_top
     );
 
     logic cursor_draw_en;
-    logic [VRAM_ADDR_WIDTH-1:0] mpd_ram_wr_address;
+    logic [$clog2(ACTIVE_COLUMNS*ACTIVE_ROWS)-1:0] mpd_ram_wr_address;
+    logic [VRAM_DATA_WIDTH-1:0] mpd_ram_wr_data;
     logic mpd_ram_wr_en;
 
     mouse_pixel_drawer #(
@@ -162,15 +164,18 @@ module falling_sand_game_top
         .mouse_x_position_i(mouse_x_position),
         .mouse_y_position_i(mouse_y_position),
         .ram_wr_address_o(mpd_ram_wr_address),
+        .ram_wr_data_o(mpd_ram_wr_data),
         .ram_wr_en_o(mpd_ram_wr_en)
     );
 
     assign ram_wr_address = cursor_draw_en ? mpd_ram_wr_address : gst_ram_wr_address;
-    assign ram_wr_data = cursor_draw_en ? 1'b1 : gst_ram_wr_data;
+    assign ram_wr_data = cursor_draw_en ? mpd_ram_wr_data : gst_ram_wr_data;
     assign ram_wr_en = cursor_draw_en ? mpd_ram_wr_en : gst_ram_wr_en;
 
     assign vga_red_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
     assign vga_blue_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
     assign vga_green_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
+
+    assign led_o = {mouse_x_position[6:0], mouse_y_position};
 
 endmodule

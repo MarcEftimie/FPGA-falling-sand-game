@@ -73,7 +73,7 @@ module cells_next_state
                 end
             end
             PIXEL_DOWN : begin
-                if ((base_address_reg + ACTIVE_COLUMNS) > (ACTIVE_COLUMNS*ACTIVE_ROWS)) begin
+                if ((base_address_reg + ACTIVE_COLUMNS) >= ((ACTIVE_COLUMNS*ACTIVE_ROWS) - 1)) begin
                     base_address_next = base_address_reg + 1;
                     rd_address = base_address_next;
                     state_next = PIXEL_EMPTY;
