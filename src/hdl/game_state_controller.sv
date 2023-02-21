@@ -6,7 +6,7 @@ module game_state_controller
         parameter ACTIVE_COLUMNS = 640,
         parameter ACTIVE_ROWS = 480,
         parameter ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS),
-        parameter DATA_WIDTH = 1
+        parameter DATA_WIDTH = 2
     )(
         input wire clk_i, reset_i,
         input wire [26:0] tick_10_ns,
@@ -38,6 +38,8 @@ module game_state_controller
 
     logic cell_redraw_ready, cell_redraw_done;
 
+    logic [ADDR_WIDTH-1:0] cns_ram_rd_address;
+
     cells_next_state #(
         .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
         .ACTIVE_ROWS(ACTIVE_ROWS),
@@ -46,13 +48,30 @@ module game_state_controller
     ) CELLS_NEXT_STATE (
         .clk_i(clk_i),
         .reset_i(reset_i),
-        .ready_i(cell_redraw_ready),
-        .pixel_state_i(vram_rd_data_i),
-        .rd_address_o(vram_rd_address_o),
-        .wr_address_o(ram_wr_address_o),
-        .wr_data_o(ram_wr_data_o),
-        .wr_en_o(ram_wr_en_o),
-        .done_o(cell_redraw_done)
+        .ready_i(),
+        .vram_rd_data(),
+        .ram_rd_data(),
+        .vram_rd_address_o(),
+        .ram_rd_address_o(),
+        .vram_wr_address_o(),
+        .ram_wr_address_o(),
+        .vram_wr_data_o(),
+        .ram_wr_data_o(),
+        .vram_wr_en_o(),
+        .ram_wr_en_o(),
+        .done_o()
+
+
+
+        // .ready_i(cell_redraw_ready),
+        // .pixel_state_i(vram_rd_data_i),
+        // .pixel_state_2_i(ram_rd_data_i),
+        // .rd_address_o(vram_rd_address_o),
+        // .rd_address_2_o(cns_ram_rd_address),
+        // .wr_address_o(ram_wr_address_o),
+        // .wr_data_o(ram_wr_data_o),
+        // .wr_en_o(ram_wr_en_o),
+        // .done_o(cell_redraw_done)
     );
 
     always_ff @(posedge clk_i, posedge reset_i ) begin
@@ -116,7 +135,7 @@ module game_state_controller
         endcase
     end
 
-    assign ram_rd_address_o = ram_rd_address;
+    assign ram_rd_address_o = ((state_reg == WAIT) || (state_reg == WRITE_VRAM)) ? ram_rd_address : cns_ram_rd_address;
     assign vram_wr_address_o = vram_wr_address_reg;
     assign vram_wr_data_o = vram_wr_data;
     assign vram_wr_en_o = vram_wr_en;

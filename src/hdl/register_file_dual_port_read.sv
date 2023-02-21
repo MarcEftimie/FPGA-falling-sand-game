@@ -5,6 +5,7 @@ module register_file_dual_port_read
     # (
         parameter ADDR_WIDTH = 8,
         parameter DATA_WIDTH = 8,
+        parameter RAM_LENGTH = 0,
         parameter ROM_FILE = "zeros.mem"
     ) (
         input wire clk_i,
@@ -16,7 +17,7 @@ module register_file_dual_port_read
 
 
     // Declarations
-    logic [DATA_WIDTH-1:0] ram [0:307200-1];
+    logic [DATA_WIDTH-1:0] ram [0:RAM_LENGTH-1];
     logic [DATA_WIDTH-1:0] rd_data_1_reg, rd_data_2_reg;
 
     initial begin

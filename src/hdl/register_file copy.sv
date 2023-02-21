@@ -1,11 +1,10 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module register_file
+module register_file_copy
     # (
         parameter ADDR_WIDTH = 8,
         parameter DATA_WIDTH = 8,
-        parameter RAM_LENGTH = 0,
         parameter ROM_FILE = "zeros.mem"
     ) (
         input wire clk_i,
@@ -17,7 +16,7 @@ module register_file
 
 
     // Declarations
-    logic [DATA_WIDTH-1:0] ram [0:RAM_LENGTH-1];
+    logic [DATA_WIDTH-1:0] ram [0:307200-1];
     logic [DATA_WIDTH-1:0] rd_data;
 
     initial begin

@@ -4,13 +4,13 @@
 module falling_sand_game_top
     #(
         parameter ACTIVE_COLUMNS = 640,
-        parameter ACTIVE_ROWS = 480,
-        parameter VRAM_DATA_WIDTH = 1,
+        parameter ACTIVE_ROWS = 400,
+        parameter VRAM_DATA_WIDTH = 2,
         parameter VRAM_ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS),
         parameter TICK_10_NS = 10000000
     )(
         input wire clk_i, reset_i,
-        input wire [2:0] sw_i,
+        input wire [3:0] sw_i,
         inout wire ps2d_io, ps2c_io,
         output logic hsync_o, vsync_o,
         output logic [3:0] vga_red_o, vga_blue_o, vga_green_o,
@@ -20,7 +20,7 @@ module falling_sand_game_top
     logic [26:0] tick_10_ns;
 
     tick_speed_controller TICK_SPEED_CONTROLLER (
-        .controller_i(sw_i),
+        .controller_i(sw_i[2:0]),
         .tick_delay_o(tick_10_ns)
     );
 
@@ -74,6 +74,7 @@ module falling_sand_game_top
     register_file_dual_port_read #(
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
         .DATA_WIDTH(VRAM_DATA_WIDTH),
+        .RAM_LENGTH(ACTIVE_COLUMNS*ACTIVE_ROWS),
         .ROM_FILE("vram.mem")
     ) VRAM_RAM (
         .clk_i(clk_i),
@@ -93,6 +94,7 @@ module falling_sand_game_top
     register_file #(
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
         .DATA_WIDTH(VRAM_DATA_WIDTH),
+        .RAM_LENGTH(ACTIVE_COLUMNS*ACTIVE_ROWS),
         .ROM_FILE("vram.mem")
     ) GAME_STATE_RAM (
         .clk_i(clk_i),
@@ -152,7 +154,26 @@ module falling_sand_game_top
     logic cursor_draw_en;
     logic [$clog2(ACTIVE_COLUMNS*ACTIVE_ROWS)-1:0] mpd_ram_wr_address;
     logic [VRAM_DATA_WIDTH-1:0] mpd_ram_wr_data;
+    logic [11:0] draw_vga;
+    logic [11:0] game_vga;
     logic mpd_ram_wr_en;
+
+    always_comb begin
+        if (sw_i[3]) begin
+            mpd_ram_wr_data = 2'b10;
+            draw_vga = 12'b000011110000;
+        end else begin
+            mpd_ram_wr_data = 2'b01;
+            draw_vga = 12'b111100001111;
+        end
+
+        case (vram_rd_data_1)
+            2'b00 : game_vga = 12'b0;
+            2'b01 : game_vga = 12'b111100001111;
+            2'b10 : game_vga = 12'b000011110000;
+            default : game_vga = 12'b0;
+        endcase
+    end
 
     mouse_pixel_drawer #(
         .COLUMNS(ACTIVE_COLUMNS),
@@ -164,7 +185,6 @@ module falling_sand_game_top
         .mouse_x_position_i(mouse_x_position),
         .mouse_y_position_i(mouse_y_position),
         .ram_wr_address_o(mpd_ram_wr_address),
-        .ram_wr_data_o(mpd_ram_wr_data),
         .ram_wr_en_o(mpd_ram_wr_en)
     );
 
@@ -172,9 +192,9 @@ module falling_sand_game_top
     assign ram_wr_data = cursor_draw_en ? mpd_ram_wr_data : gst_ram_wr_data;
     assign ram_wr_en = cursor_draw_en ? mpd_ram_wr_en : gst_ram_wr_en;
 
-    assign vga_red_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
-    assign vga_blue_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
-    assign vga_green_o = video_en ? (cursor_draw ? 4'hF : {4{vram_rd_data_1}}) : 4'h0;
+    assign vga_red_o = video_en ? (cursor_draw ? draw_vga[11:8] : game_vga[11:8]) : 4'h0;
+    assign vga_blue_o = video_en ? (cursor_draw ? draw_vga[7:4] : game_vga[7:4]) : 4'h0;
+    assign vga_green_o = video_en ? (cursor_draw ? draw_vga[3:0] : game_vga[3:0]) : 4'h0;
 
     assign led_o = {mouse_x_position[6:0], mouse_y_position};
 

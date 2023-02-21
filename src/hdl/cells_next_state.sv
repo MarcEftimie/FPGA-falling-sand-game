@@ -6,24 +6,31 @@ module cells_next_state
         parameter ACTIVE_COLUMNS = 640,
         parameter ACTIVE_ROWS = 480,
         parameter ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS),
-        parameter DATA_WIDTH = 1
+        parameter DATA_WIDTH = 2
     )(
         input wire clk_i, reset_i,
         input wire ready_i,
-        input wire [DATA_WIDTH-1:0] pixel_state_i,
-        output logic [ADDR_WIDTH-1:0] rd_address_o,
-        output logic [ADDR_WIDTH-1:0] wr_address_o,
-        output logic [DATA_WIDTH-1:0] wr_data_o,
-        output logic wr_en_o,
+        input wire [DATA_WIDTH-1:0] vram_rd_data,
+        input wire [DATA_WIDTH-1:0] ram_rd_data,
+        output logic [ADDR_WIDTH-1:0] vram_rd_address_o,
+        output logic [ADDR_WIDTH-1:0] ram_rd_address_o,
+        output logic [ADDR_WIDTH-1:0] vram_wr_address_o,
+        output logic [ADDR_WIDTH-1:0] ram_wr_address_o,
+        output logic [DATA_WIDTH-1:0] vram_wr_data_o,
+        output logic [DATA_WIDTH-1:0] ram_wr_data_o,
+        output logic vram_wr_en_o,
+        output logic ram_wr_en_o,
         output logic done_o
     );
 
-    typedef enum logic [2:0] {
+    typedef enum logic [3:0] {
         IDLE,
         PIXEL_EMPTY,
         PIXEL_DOWN,
         PIXEL_DOWN_LEFT,
         PIXEL_DOWN_RIGHT,
+        PIXEL_LEFT,
+        PIXEL_RIGHT,
         DELETE_PIXEL,
         DRAW
     } state_d;
@@ -31,108 +38,181 @@ module cells_next_state
     state_d state_reg, state_next;
 
     logic [ADDR_WIDTH-1:0] base_address_reg, base_address_next;
-    logic [ADDR_WIDTH-1:0] rd_address, wr_address;
-    logic [DATA_WIDTH-1:0] wr_data;
-    logic wr_en, done;
+    logic [ADDR_WIDTH-1:0] vram_rd_address, ram_rd_address;
+    logic [ADDR_WIDTH-1:0] vram_wr_address, ram_wr_address;
+    logic [DATA_WIDTH-1:0] vram_wr_data, ram_wr_data;
+    logic vram_wr_en, ram_wr_en;
+    logic done;
+    
+    logic [DATA_WIDTH-1:0] base_pixel_state_reg, base_pixel_state_next;
 
     always_ff @(posedge clk_i, posedge reset_i ) begin
         if (reset_i) begin
             state_reg <= IDLE;
             base_address_reg <= 0;
+            base_pixel_state_reg <= 0;
         end else begin
             state_reg <= state_next;
             base_address_reg <= base_address_next;
+            base_pixel_state_reg <= base_pixel_state_next;
         end
     end
+
+    // INCLUDE THE RAM CHECK IN THE ACTUAL CHECKS WITH PIXEL_STATE_I
 
     always_comb begin
         state_next = state_reg;
         base_address_next = base_address_reg;
-        wr_address = 0;
-        wr_data = 0;
-        wr_en = 0;
+        base_pixel_state_next = base_pixel_state_reg;
+        vram_rd_address = 0;
+        ram_rd_address = 0;
+        vram_wr_address = 0;
+        ram_wr_address = 0;
+        vram_wr_data = 0;
+        ram_wr_data = 0;
+        vram_wr_en = 0;
+        ram_wr_en = 0;
         done = 0;
         case (state_reg)
             IDLE : begin
                 if (ready_i) begin
                     base_address_next = 0;
-                    rd_address = base_address_next;
+                    base_pixel_state_next = 0;
+                    vram_rd_address = base_address_next;
                     state_next = PIXEL_EMPTY;
                 end
             end
             PIXEL_EMPTY : begin
+                base_pixel_state_next = vram_rd_data;
                 if (base_address_reg == ACTIVE_COLUMNS*ACTIVE_ROWS) begin
                     state_next = DRAW;
-                end else if (pixel_state_i == 0) begin
+                end else if (vram_rd_data == 2'b00) begin
                     base_address_next = base_address_reg + 1;
-                    rd_address = base_address_next;
+                    vram_rd_address = base_address_next;
+                    ram_rd_address = vram_rd_address;
                     state_next = PIXEL_EMPTY;
                 end else begin
-                    rd_address = base_address_next + ACTIVE_COLUMNS;
+                    vram_rd_address = base_address_reg + ACTIVE_COLUMNS;
+                    ram_rd_address = base_address_reg + ACTIVE_COLUMNS;
                     state_next = PIXEL_DOWN;
                 end
             end
             PIXEL_DOWN : begin
                 if ((base_address_reg + ACTIVE_COLUMNS) >= ((ACTIVE_COLUMNS*ACTIVE_ROWS) - 1)) begin
                     base_address_next = base_address_reg + 1;
-                    rd_address = base_address_next;
+                    vram_rd_address = base_address_next;
+                    ram_wr_address = base_address_reg;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
                     state_next = PIXEL_EMPTY;
-                end else if (pixel_state_i == 1) begin
-                    rd_address = base_address_next + ACTIVE_COLUMNS - 1;
+                end else if ((|vram_rd_data) | (|ram_rd_data)) begin
+                    vram_rd_address = base_address_reg + ACTIVE_COLUMNS - 1;
+                    ram_rd_address = base_address_reg + ACTIVE_COLUMNS - 1;
                     state_next = PIXEL_DOWN_LEFT;
                 end else begin
-                    wr_address = base_address_reg + ACTIVE_COLUMNS;
-                    wr_data = 1;
-                    wr_en = 1;
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg + ACTIVE_COLUMNS;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
                     state_next = DELETE_PIXEL;
                 end
             end
             PIXEL_DOWN_LEFT : begin
-                if (pixel_state_i == 1) begin
-                    rd_address = base_address_next + ACTIVE_COLUMNS + 1;
+                if ((|vram_rd_data) | (|ram_rd_data)) begin
+                    vram_rd_address = base_address_reg + ACTIVE_COLUMNS + 1;
+                    ram_rd_address = base_address_reg + ACTIVE_COLUMNS + 1;
                     state_next = PIXEL_DOWN_RIGHT;
                 end else begin
-                    wr_address = base_address_reg + ACTIVE_COLUMNS - 1;
-                    wr_data = 1;
-                    wr_en = 1;
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg + ACTIVE_COLUMNS - 1;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
                     state_next = DELETE_PIXEL;
                 end
             end
             PIXEL_DOWN_RIGHT : begin
-                if (pixel_state_i == 1) begin
+                if ((|vram_rd_data) | (|ram_rd_data)) begin
+                    if (base_pixel_state_reg == 2'b10) begin
+                        vram_rd_address = base_address_reg - 1;
+                        ram_rd_address = base_address_reg - 1;
+                        state_next = PIXEL_LEFT;
+                    end else begin
+                        base_address_next = base_address_reg + 1;
+                        vram_rd_address = base_address_next;
+                        ram_wr_address = base_address_reg;
+                        ram_wr_data = base_pixel_state_reg;
+                        ram_wr_en = 1;
+                        state_next = PIXEL_EMPTY;
+                    end
+                end else begin 
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg + ACTIVE_COLUMNS + 1;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
+                    state_next = DELETE_PIXEL;
+                end
+            end
+            PIXEL_LEFT : begin
+                if ((|vram_rd_data) | (|ram_rd_data)) begin
+                    vram_rd_address = base_address_reg + 1;
+                    ram_rd_address = base_address_reg + 1;
+                    state_next = PIXEL_RIGHT;
+                end else begin
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg - 1;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
+                    state_next = DELETE_PIXEL;
+                end
+            end
+            PIXEL_RIGHT : begin
+                if ((|vram_rd_data) | (|ram_rd_data)) begin
                     base_address_next = base_address_reg + 1;
-                    rd_address = base_address_next;
+                    vram_rd_address = base_address_next;
+                    ram_wr_address = base_address_reg;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
                     state_next = PIXEL_EMPTY;
                 end else begin
-                    wr_address = base_address_reg + ACTIVE_COLUMNS + 1;
-                    wr_data = 1;
-                    wr_en = 1;
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg + 1;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
                     state_next = DELETE_PIXEL;
                 end
             end
             DELETE_PIXEL : begin
                 base_address_next = base_address_reg + 1;
-                rd_address = base_address_next;
-                wr_address = base_address_reg;
-                wr_data = 0;
-                wr_en = 1;
                 state_next = PIXEL_EMPTY;
             end
-            DRAW : begin
-                wr_address = 320;
-                wr_data = 1;
-                wr_en = 1;
-                done = 1;
-                state_next = IDLE;
-            end
+            // DRAW : begin
+            //     wr_address = 320;
+            //     wr_data = 1;
+            //     wr_en = 1;
+            //     done = 1;
+            //     state_next = IDLE;
+            // end
             default : state_next = IDLE;
         endcase
     end
 
-    assign rd_address_o = rd_address;
-    assign wr_address_o = wr_address;
-    assign wr_data_o = wr_data;
-    assign wr_en_o = wr_en;
-    assign done_o = done;
+    assign vram_rd_address_o = vram_rd_address;
+    assign ram_rd_address_o = ram_rd_address;
+    assign vram_wr_address_o = vram_wr_address;
+    assign ram_wr_address_o = ram_wr_address;
+    assign vram_wr_data_o = vram_wr_data;
+    assign ram_wr_data_o = ram_wr_data;
+    assign vram_wr_en_o = vram_wr_en;
+    assign ram_wr_en_o = ram_wr_en;
 
 endmodule

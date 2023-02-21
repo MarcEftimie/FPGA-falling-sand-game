@@ -4,13 +4,13 @@
 module sync_pulse_generator 
     #(
         parameter TOTAL_COLUMNS = 800,
-        parameter TOTAL_ROWS = 525,
+        parameter TOTAL_ROWS = 449,
         parameter ACTIVE_COLUMNS = 640,
-        parameter ACTIVE_ROWS = 480,
+        parameter ACTIVE_ROWS = 400,
         parameter FRONT_PORCH_HORIZONTAL = 16,
-        parameter FRONT_PORCH_VERTICAL = 10,
+        parameter FRONT_PORCH_VERTICAL = 12,
         parameter BACK_PORCH_HORIZONTAL = 48,
-        parameter BACK_PORCH_VERTICAL = 33
+        parameter BACK_PORCH_VERTICAL = 35
     )(
         input wire clk_i, reset_i,
         output logic hsync_o, vsync_o, video_en_o,
