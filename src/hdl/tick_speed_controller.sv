@@ -9,7 +9,7 @@ module tick_speed_controller
 
     always_comb begin
         case (controller_i)
-            0 : tick_delay_o = 100000000;
+            0 : tick_delay_o = 400000;
             1 : tick_delay_o = 100000000/2;
             2 : tick_delay_o = 100000000/4;
             3 : tick_delay_o = 100000000/8;

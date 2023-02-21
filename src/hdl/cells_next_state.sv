@@ -85,7 +85,8 @@ module cells_next_state
             PIXEL_EMPTY : begin
                 base_pixel_state_next = vram_rd_data;
                 if (base_address_reg == ACTIVE_COLUMNS*ACTIVE_ROWS) begin
-                    state_next = DRAW;
+                    done = 1;
+                    state_next = IDLE;
                 end else if (vram_rd_data == 2'b00) begin
                     base_address_next = base_address_reg + 1;
                     vram_rd_address = base_address_next;
@@ -192,13 +193,14 @@ module cells_next_state
                 end
             end
             DELETE_PIXEL : begin
-                base_address_next = base_address_reg + 1;
+                // base_address_next = base_address_reg + 1;
+                // vram_rd_address = base_address_next;
                 state_next = PIXEL_EMPTY;
             end
             // DRAW : begin
-            //     wr_address = 320;
-            //     wr_data = 1;
-            //     wr_en = 1;
+            //     ram_wr_address = 320;
+            //     ram_wr_data = 2'b01;
+            //     ram_wr_en = 1;
             //     done = 1;
             //     state_next = IDLE;
             // end
@@ -214,5 +216,6 @@ module cells_next_state
     assign ram_wr_data_o = ram_wr_data;
     assign vram_wr_en_o = vram_wr_en;
     assign ram_wr_en_o = ram_wr_en;
+    assign done_o = done;
 
 endmodule

@@ -6,8 +6,7 @@ module falling_sand_game_top
         parameter ACTIVE_COLUMNS = 640,
         parameter ACTIVE_ROWS = 400,
         parameter VRAM_DATA_WIDTH = 2,
-        parameter VRAM_ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS),
-        parameter TICK_10_NS = 10000000
+        parameter VRAM_ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS)
     )(
         input wire clk_i, reset_i,
         input wire [3:0] sw_i,
@@ -40,9 +39,9 @@ module falling_sand_game_top
         .pixel_o(pixel_count)
     );
 
-    logic gst_ram_wr_en;
-    logic [VRAM_ADDR_WIDTH-1:0] gst_ram_wr_address;
-    logic [VRAM_DATA_WIDTH-1:0] gst_ram_wr_data;
+    logic [VRAM_ADDR_WIDTH-1:0] gst_vram_wr_address;
+    logic [VRAM_DATA_WIDTH-1:0] gst_vram_wr_data;
+    logic gst_vram_wr_en;
 
     game_state_controller #(
         .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
@@ -58,12 +57,12 @@ module falling_sand_game_top
         .vram_rd_data_i(vram_rd_data_2),
         .ram_rd_address_o(ram_rd_address),
         .vram_rd_address_o(vram_rd_address),
-        .ram_wr_address_o(gst_ram_wr_address),
-        .vram_wr_address_o(vram_wr_address),
-        .ram_wr_data_o(gst_ram_wr_data),
-        .vram_wr_data_o(vram_wr_data),
-        .ram_wr_en_o(gst_ram_wr_en),
-        .vram_wr_en_o(vram_wr_en),
+        .ram_wr_address_o(ram_wr_address),
+        .vram_wr_address_o(gst_vram_wr_address),
+        .ram_wr_data_o(ram_wr_data),
+        .vram_wr_data_o(gst_vram_wr_data),
+        .ram_wr_en_o(ram_wr_en),
+        .vram_wr_en_o(gst_vram_wr_en),
         .draw_en_o(cursor_draw_en)
     );
 
@@ -95,7 +94,7 @@ module falling_sand_game_top
         .ADDR_WIDTH(VRAM_ADDR_WIDTH),
         .DATA_WIDTH(VRAM_DATA_WIDTH),
         .RAM_LENGTH(ACTIVE_COLUMNS*ACTIVE_ROWS),
-        .ROM_FILE("vram.mem")
+        .ROM_FILE("zeros.mem")
     ) GAME_STATE_RAM (
         .clk_i(clk_i),
         .wr_en(ram_wr_en),
@@ -152,18 +151,15 @@ module falling_sand_game_top
     );
 
     logic cursor_draw_en;
-    logic [$clog2(ACTIVE_COLUMNS*ACTIVE_ROWS)-1:0] mpd_ram_wr_address;
-    logic [VRAM_DATA_WIDTH-1:0] mpd_ram_wr_data;
     logic [11:0] draw_vga;
     logic [11:0] game_vga;
-    logic mpd_ram_wr_en;
 
     always_comb begin
         if (sw_i[3]) begin
-            mpd_ram_wr_data = 2'b10;
+            mpd_vram_wr_data = 2'b10;
             draw_vga = 12'b000011110000;
         end else begin
-            mpd_ram_wr_data = 2'b01;
+            mpd_vram_wr_data = 2'b01;
             draw_vga = 12'b111100001111;
         end
 
@@ -175,6 +171,10 @@ module falling_sand_game_top
         endcase
     end
 
+    logic [VRAM_ADDR_WIDTH-1:0] mpd_vram_wr_address;
+    logic [VRAM_DATA_WIDTH-1:0] mpd_vram_wr_data;
+    logic mpd_vram_wr_en;
+
     mouse_pixel_drawer #(
         .COLUMNS(ACTIVE_COLUMNS),
         .ROWS(ACTIVE_ROWS)
@@ -184,13 +184,13 @@ module falling_sand_game_top
         .draw_en_i(cursor_draw_en),
         .mouse_x_position_i(mouse_x_position),
         .mouse_y_position_i(mouse_y_position),
-        .ram_wr_address_o(mpd_ram_wr_address),
-        .ram_wr_en_o(mpd_ram_wr_en)
+        .wr_address_o(mpd_vram_wr_address),
+        .wr_en_o(mpd_vram_wr_en)
     );
 
-    assign ram_wr_address = cursor_draw_en ? mpd_ram_wr_address : gst_ram_wr_address;
-    assign ram_wr_data = cursor_draw_en ? mpd_ram_wr_data : gst_ram_wr_data;
-    assign ram_wr_en = cursor_draw_en ? mpd_ram_wr_en : gst_ram_wr_en;
+    assign vram_wr_address = cursor_draw_en ? mpd_vram_wr_address : gst_vram_wr_address;
+    assign vram_wr_data = cursor_draw_en ? mpd_vram_wr_data : gst_vram_wr_data;
+    assign vram_wr_en = cursor_draw_en ? mpd_vram_wr_en : gst_vram_wr_en;
 
     assign vga_red_o = video_en ? (cursor_draw ? draw_vga[11:8] : game_vga[11:8]) : 4'h0;
     assign vga_blue_o = video_en ? (cursor_draw ? draw_vga[7:4] : game_vga[7:4]) : 4'h0;
