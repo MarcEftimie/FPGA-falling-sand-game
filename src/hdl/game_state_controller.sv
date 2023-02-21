@@ -32,13 +32,26 @@ module game_state_controller
     logic [26:0] tick_count_reg, tick_count_next;
 
     logic [ADDR_WIDTH-1:0] vram_wr_address_reg, vram_wr_address_next;
+    logic [ADDR_WIDTH-1:0] ram_wr_address;
     logic [ADDR_WIDTH-1:0] ram_rd_address;
     logic [DATA_WIDTH-1:0] vram_wr_data;
+    logic [DATA_WIDTH-1:0] ram_wr_data;
     logic vram_wr_en;
 
     logic cell_redraw_ready, cell_redraw_done;
 
+    logic [DATA_WIDTH-1:0] cns_vram_rd_data;
+    logic [DATA_WIDTH-1:0] cns_ram_rd_data;
+    logic [ADDR_WIDTH-1:0] cns_vram_rd_address;
     logic [ADDR_WIDTH-1:0] cns_ram_rd_address;
+    logic [ADDR_WIDTH-1:0] cns_vram_wr_address;
+    logic [ADDR_WIDTH-1:0] cns_ram_wr_address;
+    logic [DATA_WIDTH-1:0] cns_vram_wr_data;
+    logic [DATA_WIDTH-1:0] cns_ram_wr_data;
+    logic cns_vram_wr_en;
+    logic cns_ram_wr_en;
+    
+    
 
     cells_next_state #(
         .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
@@ -48,30 +61,18 @@ module game_state_controller
     ) CELLS_NEXT_STATE (
         .clk_i(clk_i),
         .reset_i(reset_i),
-        .ready_i(),
-        .vram_rd_data(),
-        .ram_rd_data(),
-        .vram_rd_address_o(),
-        .ram_rd_address_o(),
-        .vram_wr_address_o(),
-        .ram_wr_address_o(),
-        .vram_wr_data_o(),
-        .ram_wr_data_o(),
-        .vram_wr_en_o(),
-        .ram_wr_en_o(),
-        .done_o()
-
-
-
-        // .ready_i(cell_redraw_ready),
-        // .pixel_state_i(vram_rd_data_i),
-        // .pixel_state_2_i(ram_rd_data_i),
-        // .rd_address_o(vram_rd_address_o),
-        // .rd_address_2_o(cns_ram_rd_address),
-        // .wr_address_o(ram_wr_address_o),
-        // .wr_data_o(ram_wr_data_o),
-        // .wr_en_o(ram_wr_en_o),
-        // .done_o(cell_redraw_done)
+        .ready_i(cell_redraw_ready),
+        .vram_rd_data(cns_vram_rd_data),
+        .ram_rd_data(cns_ram_rd_data),
+        .vram_rd_address_o(cns_vram_rd_address),
+        .ram_rd_address_o(cns_ram_rd_address),
+        .vram_wr_address_o(cns_vram_wr_address),
+        .ram_wr_address_o(cns_ram_wr_address),
+        .vram_wr_data_o(cns_vram_wr_data),
+        .ram_wr_data_o(cns_ram_wr_data),
+        .vram_wr_en_o(cns_vram_wr_en),
+        .ram_wr_en_o(cns_ram_wr_en),
+        .done_o(cell_redraw_done)
     );
 
     always_ff @(posedge clk_i, posedge reset_i ) begin
@@ -89,6 +90,7 @@ module game_state_controller
     always_comb begin
         state_next = state_reg;
         vram_wr_address_next = vram_wr_address_reg;
+        ram_wr_address = 0;
         tick_count_next = tick_count_reg;
         cell_redraw_ready = 0;
         vram_wr_data = 0;
@@ -135,9 +137,13 @@ module game_state_controller
         endcase
     end
 
+    assign vram_rd_address_o = cns_vram_rd_address;
     assign ram_rd_address_o = ((state_reg == WAIT) || (state_reg == WRITE_VRAM)) ? ram_rd_address : cns_ram_rd_address;
-    assign vram_wr_address_o = vram_wr_address_reg;
-    assign vram_wr_data_o = vram_wr_data;
-    assign vram_wr_en_o = vram_wr_en;
+    assign vram_wr_address_o = ((state_reg == WAIT) || (state_reg == WRITE_VRAM)) ? vram_wr_address_reg : cns_vram_wr_address;
+    assign ram_wr_address_o = ((state_reg == WAIT) || (state_reg == WRITE_VRAM)) ? ram_wr_address : cns_ram_wr_address;
+    assign vram_wr_data_o = ((state_reg == WAIT) || (state_reg == WRITE_VRAM)) ? vram_wr_data : cns_vram_wr_data;
+    assign ram_wr_data_o = ((state_reg == WAIT) || (state_reg == WRITE_VRAM)) ? ram_wr_data : cns_ram_wr_data;
+    assign vram_wr_en_o = ((state_reg == WAIT) || (state_reg == WRITE_VRAM)) ? vram_wr_en : cns_vram_wr_en;
+    assign ram_wr_en_o = ((state_reg == WAIT) || (state_reg == WRITE_VRAM)) ? vram_wr_en : cns_ram_wr_en;
 
 endmodule
