@@ -46,15 +46,48 @@ module cells_next_state
     
     logic [DATA_WIDTH-1:0] base_pixel_state_reg, base_pixel_state_next;
 
-    always_ff @(posedge clk_i, posedge reset_i ) begin
+    logic [2:0] pixel_surrounding_state_reg, pixel_surrounding_state_next;
+
+    logic [2:0] random_counter_reg, random_counter_next;
+    logic down_random, left_down_random, right_down_random;
+    
+    always_ff @(posedge clk_i, posedge reset_i) begin
+        if (reset_i) begin
+            random_counter_reg <= 0;
+        end else begin
+            random_counter_reg <= random_counter_next;
+        end
+    end
+
+    assign random_counter_next = random_counter_reg + 1;
+    always_comb begin
+        down_random = 0;
+        left_down_random = 0;
+        right_down_random = 0;
+        case (random_counter_reg)
+            0 : down_random = 1;
+            1 : down_random = 1;
+            2 : down_random = 1;
+            3 : down_random = 1;
+            4 : down_random = 1;
+            5 : down_random = 1;
+            6 : down_random = 1;
+            7 : down_random = 1;
+        endcase
+    end
+
+
+    always_ff @(posedge clk_i, posedge reset_i) begin
         if (reset_i) begin
             state_reg <= IDLE;
             base_address_reg <= 0;
             base_pixel_state_reg <= 0;
+            pixel_surrounding_state_reg <= 0;
         end else begin
             state_reg <= state_next;
             base_address_reg <= base_address_next;
             base_pixel_state_reg <= base_pixel_state_next;
+            pixel_surrounding_state_reg <= pixel_surrounding_state_next;
         end
     end
 
@@ -64,6 +97,7 @@ module cells_next_state
         state_next = state_reg;
         base_address_next = base_address_reg;
         base_pixel_state_next = base_pixel_state_reg;
+        pixel_surrounding_state_next = pixel_surrounding_state_reg;
         vram_rd_address = 0;
         ram_rd_address = 0;
         vram_wr_address = 0;
@@ -73,6 +107,16 @@ module cells_next_state
         vram_wr_en = 0;
         ram_wr_en = 0;
         done = 0;
+
+        // Check empty
+        // Check down
+        // Check down right
+        // Check down left
+        // Down gets 1/2
+        // Bottom right gets 1/4
+        // Bottom left gets 1/4
+        // [BL 0 BR 0 DOWN 0]
+
         case (state_reg)
             IDLE : begin
                 if (ready_i) begin
