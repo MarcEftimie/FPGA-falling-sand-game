@@ -48,7 +48,7 @@ module cells_next_state
 
     logic [2:0] pixel_surrounding_state_reg, pixel_surrounding_state_next;
 
-    logic [1:0] random_counter_reg, random_counter_next;
+    logic [2:0] random_counter_reg, random_counter_next;
     logic down_random, left_down_random, right_down_random;
     
     always_ff @(posedge clk_i, posedge reset_i) begin
@@ -59,7 +59,7 @@ module cells_next_state
         end
     end
 
-    assign random_counter_next = random_counter_reg + 3;
+    assign random_counter_next = random_counter_reg + 1;
 
     always_ff @(posedge clk_i, posedge reset_i) begin
         if (reset_i) begin
@@ -139,86 +139,42 @@ module cells_next_state
                     ram_wr_data = base_pixel_state_reg;
                     ram_wr_en = 1;
                     state_next = PIXEL_EMPTY;
-                end else begin
-                    // Check pixel down left
+                end else if (pixel_surrounding_state_next[0]) begin
+                    // 
                     vram_rd_address = base_address_reg + ACTIVE_COLUMNS - 1;
                     ram_rd_address = base_address_reg + ACTIVE_COLUMNS - 1;
                     state_next = PIXEL_DOWN_LEFT;
+                end else begin
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg + ACTIVE_COLUMNS;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
+                    state_next = DELETE_PIXEL;
                 end
             end
             PIXEL_DOWN_LEFT : begin
-                pixel_surrounding_state_next[1] = (|vram_rd_data) | (|ram_rd_data);
-                // Check pixel down right
-                vram_rd_address = base_address_reg + ACTIVE_COLUMNS + 1;
-                ram_rd_address = base_address_reg + ACTIVE_COLUMNS + 1;
-                state_next = PIXEL_DOWN_RIGHT;
+                if ((|vram_rd_data) | (|ram_rd_data)) begin
+                    vram_rd_address = base_address_reg + ACTIVE_COLUMNS + 1;
+                    ram_rd_address = base_address_reg + ACTIVE_COLUMNS + 1;
+                    state_next = PIXEL_DOWN_RIGHT;
+                end else begin
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg + ACTIVE_COLUMNS - 1;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
+                    state_next = DELETE_PIXEL;
+                end
             end
             PIXEL_DOWN_RIGHT : begin
-                pixel_surrounding_state_next[2] = (|vram_rd_data) | (|ram_rd_data);
-                if (base_pixel_state_reg == 2'b01) begin
-                    down_random = 0;
-                    left_down_random = 0;
-                    right_down_random = 0;
-                    case (pixel_surrounding_state_next)
-                        3'b000 : begin
-                            down_random = (random_counter_reg == 0) || (random_counter_reg == 1);
-                            left_down_random = (random_counter_reg == 2);
-                            right_down_random = (random_counter_reg == 3);
-                        end
-                        // Down
-                        3'b001 : begin
-                            left_down_random = (random_counter_reg == 0) || (random_counter_reg == 1);
-                            right_down_random = (random_counter_reg == 2) || (random_counter_reg == 3);
-                        end
-                        // Down Left
-                        3'b010 : begin
-                            down_random = (random_counter_reg == 0) || (random_counter_reg == 1) || (random_counter_reg == 2);
-                            right_down_random = (random_counter_reg == 3);
-                        end
-                        // Down, Down Left
-                        3'b011 : begin
-                            right_down_random = 1;
-                        end
-                        // Down Right
-                        3'b100 : begin
-                            down_random = (random_counter_reg == 0) || (random_counter_reg == 1) || (random_counter_reg == 2);
-                            left_down_random = (random_counter_reg == 3);
-                        end
-                        // Down, Down Right
-                        3'b101 : begin
-                            left_down_random = 1;
-                        end
-                        // Down Left, Down Right
-                        3'b110 : begin
-                            down_random = 1;
-                        end
-                        default : ;
-                    endcase
-
-                    if (down_random) begin
-                        vram_wr_address = base_address_reg;
-                        vram_wr_data = 0;
-                        vram_wr_en = 1;
-                        ram_wr_address = base_address_reg + ACTIVE_COLUMNS;
-                        ram_wr_data = base_pixel_state_reg;
-                        ram_wr_en = 1;
-                        state_next = DELETE_PIXEL;
-                    end else if (left_down_random) begin
-                        vram_wr_address = base_address_reg;
-                        vram_wr_data = 0;
-                        vram_wr_en = 1;
-                        ram_wr_address = base_address_reg + ACTIVE_COLUMNS - 1;
-                        ram_wr_data = base_pixel_state_reg;
-                        ram_wr_en = 1;
-                        state_next = DELETE_PIXEL;
-                    end else if (right_down_random) begin
-                        vram_wr_address = base_address_reg;
-                        vram_wr_data = 0;
-                        vram_wr_en = 1;
-                        ram_wr_address = base_address_reg + ACTIVE_COLUMNS + 1;
-                        ram_wr_data = base_pixel_state_reg;
-                        ram_wr_en = 1;
-                        state_next = DELETE_PIXEL;
+                if ((|vram_rd_data) | (|ram_rd_data)) begin
+                    if (base_pixel_state_reg == 2'b10) begin
+                        vram_rd_address = base_address_reg - 1;
+                        ram_rd_address = base_address_reg - 1;
+                        state_next = PIXEL_LEFT;
                     end else begin
                         base_address_next = base_address_reg + 1;
                         vram_rd_address = base_address_next;
@@ -227,29 +183,15 @@ module cells_next_state
                         ram_wr_en = 1;
                         state_next = PIXEL_EMPTY;
                     end
+                end else begin 
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg + ACTIVE_COLUMNS + 1;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
+                    state_next = DELETE_PIXEL;
                 end
-                // if ((|vram_rd_data) | (|ram_rd_data)) begin
-                //     if (base_pixel_state_reg == 2'b10) begin
-                //         vram_rd_address = base_address_reg - 1;
-                //         ram_rd_address = base_address_reg - 1;
-                //         state_next = PIXEL_LEFT;
-                //     end else begin
-                //         base_address_next = base_address_reg + 1;
-                //         vram_rd_address = base_address_next;
-                //         ram_wr_address = base_address_reg;
-                //         ram_wr_data = base_pixel_state_reg;
-                //         ram_wr_en = 1;
-                //         state_next = PIXEL_EMPTY;
-                //     end
-                // end else begin 
-                //     vram_wr_address = base_address_reg;
-                //     vram_wr_data = 0;
-                //     vram_wr_en = 1;
-                //     ram_wr_address = base_address_reg + ACTIVE_COLUMNS + 1;
-                //     ram_wr_data = base_pixel_state_reg;
-                //     ram_wr_en = 1;
-                //     state_next = DELETE_PIXEL;
-                // end
             end
             PIXEL_LEFT : begin
                 if ((|vram_rd_data) | (|ram_rd_data)) begin
@@ -285,10 +227,17 @@ module cells_next_state
                 end
             end
             DELETE_PIXEL : begin
-                base_address_next = base_address_reg + 1;
-                vram_rd_address = base_address_next;
+                // base_address_next = base_address_reg + 1;
+                // vram_rd_address = base_address_next;
                 state_next = PIXEL_EMPTY;
             end
+            // DRAW : begin
+            //     ram_wr_address = 320;
+            //     ram_wr_data = 2'b01;
+            //     ram_wr_en = 1;
+            //     done = 1;
+            //     state_next = IDLE;
+            // end
             default : state_next = IDLE;
         endcase
     end
