@@ -59,7 +59,17 @@ module cells_next_state
         end
     end
 
-    assign random_counter_next = random_counter_reg + 3;
+    assign random_counter_next = LFSR[7] ? random_counter_reg + 1 : random_counter_reg;
+
+    logic [7:0] LFSR;
+
+    always_ff @(posedge clk_i, posedge reset_i) begin
+        if (reset_i) begin
+            LFSR <= 8'd1;
+        end else begin
+            LFSR <= {LFSR[6:0], LFSR[7] ^ LFSR[5] ^ LFSR[4] ^ LFSR[3]};
+        end
+    end
 
     always_ff @(posedge clk_i, posedge reset_i) begin
         if (reset_i) begin
