@@ -50,11 +50,11 @@ module game_state_controller
     logic cns_vram_wr_en;
     logic cns_ram_wr_en;
     
-    
+    logic gst_vram_ram_en;
 
     cells_next_state #(
-        .ACTIVE_COLUMNS(ACTIVE_COLUMNS),
-        .ACTIVE_ROWS(ACTIVE_ROWS),
+        .COLUMNS(ACTIVE_COLUMNS),
+        .ROWS(ACTIVE_ROWS),
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) CELLS_NEXT_STATE (
@@ -151,13 +151,15 @@ module game_state_controller
         endcase
     end
 
+    assign gst_vram_ram_en = ((state_reg == CLEAR_RAM) || (state_reg == WRITE_VRAM)) ? 1'b1 : 1'b0;
+
     assign vram_rd_address_o = cns_vram_rd_address;
-    assign ram_rd_address_o = ((state_reg == CLEAR_RAM) || (state_reg == WRITE_VRAM)) ? ram_rd_address : cns_ram_rd_address;
-    assign vram_wr_address_o = ((state_reg == CLEAR_RAM) || (state_reg == WRITE_VRAM)) ? vram_wr_address_reg : cns_vram_wr_address;
-    assign ram_wr_address_o = ((state_reg == CLEAR_RAM) || (state_reg == WRITE_VRAM)) ? ram_wr_address_reg : cns_ram_wr_address;
-    assign vram_wr_data_o = ((state_reg == CLEAR_RAM) || (state_reg == WRITE_VRAM)) ? vram_wr_data : cns_vram_wr_data;
-    assign ram_wr_data_o = ((state_reg == CLEAR_RAM) || (state_reg == WRITE_VRAM)) ? ram_wr_data : cns_ram_wr_data;
-    assign vram_wr_en_o = ((state_reg == CLEAR_RAM) || (state_reg == WRITE_VRAM)) ? vram_wr_en : cns_vram_wr_en;
-    assign ram_wr_en_o = ((state_reg == CLEAR_RAM) || (state_reg == WRITE_VRAM)) ? ram_wr_en : cns_ram_wr_en;
+    assign ram_rd_address_o = gst_vram_ram_en ? ram_rd_address : cns_ram_rd_address;
+    assign vram_wr_address_o = gst_vram_ram_en ? vram_wr_address_reg : cns_vram_wr_address;
+    assign ram_wr_address_o = gst_vram_ram_en ? ram_wr_address_reg : cns_ram_wr_address;
+    assign vram_wr_data_o = gst_vram_ram_en ? vram_wr_data : cns_vram_wr_data;
+    assign ram_wr_data_o = gst_vram_ram_en ? ram_wr_data : cns_ram_wr_data;
+    assign vram_wr_en_o = gst_vram_ram_en ? vram_wr_en : cns_vram_wr_en;
+    assign ram_wr_en_o = gst_vram_ram_en ? ram_wr_en : cns_ram_wr_en;
 
 endmodule

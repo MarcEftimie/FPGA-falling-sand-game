@@ -3,9 +3,9 @@
 
 module cells_next_state
     #(
-        parameter ACTIVE_COLUMNS = 640,
-        parameter ACTIVE_ROWS = 480,
-        parameter ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS),
+        parameter COLUMNS = 640,
+        parameter ROWS = 480,
+        parameter ADDR_WIDTH = $clog2(COLUMNS*ROWS),
         parameter DATA_WIDTH = 2
     )(
         input wire clk_i, reset_i,
@@ -32,7 +32,7 @@ module cells_next_state
         PIXEL_LEFT,
         PIXEL_RIGHT,
         DELETE_PIXEL,
-        DRAW
+        SWAP_PIXEL
     } state_d;
 
     state_d state_reg, state_next;
@@ -46,7 +46,7 @@ module cells_next_state
     
     logic [DATA_WIDTH-1:0] base_pixel_state_reg, base_pixel_state_next;
 
-    logic [4:0] pixel_surrounding_state_reg, pixel_surrounding_state_next;
+    logic [2:0] pixel_surrounding_state_reg, pixel_surrounding_state_next;
 
     logic [2:0] random_counter_reg, random_counter_next;
     logic down_random, left_down_random, right_down_random, left_random, right_random;
@@ -87,8 +87,6 @@ module cells_next_state
         end
     end
 
-    // INCLUDE THE RAM CHECK IN THE ACTUAL CHECKS WITH PIXEL_STATE_I
-
     always_comb begin
         state_next = state_reg;
         base_address_next = base_address_reg;
@@ -122,7 +120,7 @@ module cells_next_state
             PIXEL_EMPTY : begin
                 base_pixel_state_next = vram_rd_data;
                 pixel_surrounding_state_next = 0;
-                if (base_address_reg == ACTIVE_COLUMNS*ACTIVE_ROWS) begin
+                if (base_address_reg == COLUMNS*ROWS) begin
                     // All pixels redrawn
                     done = 1;
                     state_next = IDLE;
@@ -134,14 +132,14 @@ module cells_next_state
                     state_next = PIXEL_EMPTY;
                 end else begin
                     // Check pixel down
-                    vram_rd_address = base_address_reg + ACTIVE_COLUMNS;
-                    ram_rd_address = base_address_reg + ACTIVE_COLUMNS;
+                    vram_rd_address = base_address_reg + COLUMNS;
+                    ram_rd_address = base_address_reg + COLUMNS;
                     state_next = PIXEL_DOWN;
                 end
             end
             PIXEL_DOWN : begin
                 pixel_surrounding_state_next[0] = (|vram_rd_data) | (|ram_rd_data);
-                if ((base_address_reg + ACTIVE_COLUMNS) >= ((ACTIVE_COLUMNS*ACTIVE_ROWS) - 1)) begin
+                if ((base_address_reg + COLUMNS) >= ((COLUMNS*ROWS) - 1)) begin
                     // Pixel on bottom layer
                     base_address_next = base_address_reg + 1;
                     vram_rd_address = base_address_next;
@@ -149,23 +147,41 @@ module cells_next_state
                     ram_wr_data = base_pixel_state_reg;
                     ram_wr_en = 1;
                     state_next = PIXEL_EMPTY;
+                end if ((base_pixel_state_reg == 2'b01) && (vram_rd_data == 2'b10)) begin
+                    // Sand above water
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg;
+                    ram_wr_data = 2'b10;
+                    ram_wr_en = 1;
+                    state_next = SWAP_PIXEL;
                 end else begin
                     // Check pixel down left
-                    vram_rd_address = base_address_reg + ACTIVE_COLUMNS - 1;
-                    ram_rd_address = base_address_reg + ACTIVE_COLUMNS - 1;
+                    vram_rd_address = base_address_reg + COLUMNS - 1;
+                    ram_rd_address = base_address_reg + COLUMNS - 1;
                     state_next = PIXEL_DOWN_LEFT;
                 end
+            end
+            SWAP_PIXEL : begin
+                vram_wr_address = base_address_reg + COLUMNS;
+                vram_wr_data = 0;
+                vram_wr_en = 1;
+                ram_wr_address = base_address_reg + COLUMNS;
+                ram_wr_data = 2'b01;
+                ram_wr_en = 1;
+                state_next = DELETE_PIXEL;
             end
             PIXEL_DOWN_LEFT : begin
                 pixel_surrounding_state_next[1] = (|vram_rd_data) | (|ram_rd_data);
                 // Check pixel down right
-                vram_rd_address = base_address_reg + ACTIVE_COLUMNS + 1;
-                ram_rd_address = base_address_reg + ACTIVE_COLUMNS + 1;
+                vram_rd_address = base_address_reg + COLUMNS + 1;
+                ram_rd_address = base_address_reg + COLUMNS + 1;
                 state_next = PIXEL_DOWN_RIGHT;
             end
             PIXEL_DOWN_RIGHT : begin
                 pixel_surrounding_state_next[2] = (|vram_rd_data) | (|ram_rd_data);
-                case (pixel_surrounding_state_next[2:0])
+                case (pixel_surrounding_state_next)
                     3'b000 : begin
                         if ((random_counter_reg == 0) ||
                             (random_counter_reg == 1) || 
@@ -237,7 +253,7 @@ module cells_next_state
                     vram_wr_address = base_address_reg;
                     vram_wr_data = 0;
                     vram_wr_en = 1;
-                    ram_wr_address = base_address_reg + ACTIVE_COLUMNS;
+                    ram_wr_address = base_address_reg + COLUMNS;
                     ram_wr_data = base_pixel_state_reg;
                     ram_wr_en = 1;
                     state_next = DELETE_PIXEL;
@@ -245,7 +261,7 @@ module cells_next_state
                     vram_wr_address = base_address_reg;
                     vram_wr_data = 0;
                     vram_wr_en = 1;
-                    ram_wr_address = base_address_reg + ACTIVE_COLUMNS - 1;
+                    ram_wr_address = base_address_reg + COLUMNS - 1;
                     ram_wr_data = base_pixel_state_reg;
                     ram_wr_en = 1;
                     state_next = DELETE_PIXEL;
@@ -254,7 +270,7 @@ module cells_next_state
                     vram_wr_data = 0;
                     vram_wr_en = 1;
                     ram_wr_en = 1;
-                    ram_wr_address = base_address_reg + ACTIVE_COLUMNS + 1;
+                    ram_wr_address = base_address_reg + COLUMNS + 1;
                     ram_wr_data = base_pixel_state_reg;
                     state_next = DELETE_PIXEL;
                 end else begin
@@ -275,14 +291,14 @@ module cells_next_state
                 end
             end
             PIXEL_LEFT : begin
-                pixel_surrounding_state_next[3] = ((|vram_rd_data) | (|ram_rd_data));
+                pixel_surrounding_state_next[0] = ((|vram_rd_data) | (|ram_rd_data));
                 vram_rd_address = base_address_reg + 1;
                 ram_rd_address = base_address_reg + 1;
                 state_next = PIXEL_RIGHT;
             end
             PIXEL_RIGHT : begin
-                pixel_surrounding_state_next[4] = ((|vram_rd_data) | (|ram_rd_data));
-                case (pixel_surrounding_state_next[4:3])
+                pixel_surrounding_state_next[1] = ((|vram_rd_data) | (|ram_rd_data));
+                case (pixel_surrounding_state_next[1:0])
                     2'b00 : begin
                         if ((random_counter_reg == 0) ||
                             (random_counter_reg == 1) || 
