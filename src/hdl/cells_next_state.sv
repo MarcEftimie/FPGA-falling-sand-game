@@ -46,7 +46,7 @@ module cells_next_state
     
     logic [DATA_WIDTH-1:0] base_pixel_state_reg, base_pixel_state_next;
 
-    logic [2:0] pixel_surrounding_state_reg, pixel_surrounding_state_next;
+    logic [4:0] pixel_surrounding_state_reg, pixel_surrounding_state_next;
 
     logic [2:0] random_counter_reg, random_counter_next;
     logic down_random, left_down_random, right_down_random, left_random, right_random;
@@ -165,7 +165,7 @@ module cells_next_state
             end
             PIXEL_DOWN_RIGHT : begin
                 pixel_surrounding_state_next[2] = (|vram_rd_data) | (|ram_rd_data);
-                case (pixel_surrounding_state_next)
+                case (pixel_surrounding_state_next[2:0])
                     3'b000 : begin
                         if ((random_counter_reg == 0) ||
                             (random_counter_reg == 1) || 
@@ -275,14 +275,14 @@ module cells_next_state
                 end
             end
             PIXEL_LEFT : begin
-                pixel_surrounding_state_next[0] = ((|vram_rd_data) | (|ram_rd_data));
+                pixel_surrounding_state_next[3] = ((|vram_rd_data) | (|ram_rd_data));
                 vram_rd_address = base_address_reg + 1;
                 ram_rd_address = base_address_reg + 1;
                 state_next = PIXEL_RIGHT;
             end
             PIXEL_RIGHT : begin
-                pixel_surrounding_state_next[1] = ((|vram_rd_data) | (|ram_rd_data));
-                case (pixel_surrounding_state_next)
+                pixel_surrounding_state_next[4] = ((|vram_rd_data) | (|ram_rd_data));
+                case (pixel_surrounding_state_next[4:3])
                     2'b00 : begin
                         if ((random_counter_reg == 0) ||
                             (random_counter_reg == 1) || 
@@ -293,13 +293,13 @@ module cells_next_state
                             left_random = 1;
                         end
                     end
-                    // Right
-                    2'b01 : begin
-                        left_random = 1;
-                    end
                     // Left
-                    2'b10 : begin
+                    2'b01 : begin
                         right_random = 1;
+                    end
+                    // Right
+                    2'b10 : begin
+                        left_random = 1;
                     end
                     default : ;
                 endcase
