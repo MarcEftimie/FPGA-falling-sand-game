@@ -9,7 +9,7 @@ module falling_sand_game_top
         parameter VRAM_ADDR_WIDTH = $clog2(ACTIVE_COLUMNS*ACTIVE_ROWS)
     )(
         input wire clk_i, reset_i,
-        input wire [3:0] sw_i,
+        input wire [4:0] sw_i,
         inout wire ps2d_io, ps2c_io,
         output logic hsync_o, vsync_o,
         output logic [3:0] vga_red_o, vga_blue_o, vga_green_o,
@@ -155,6 +155,23 @@ module falling_sand_game_top
     logic [11:0] game_vga;
 
     always_comb begin
+        case (sw_i[4:3])
+            2'b00 : begin
+                mpd_vram_wr_data = 2'b10;
+                draw_vga = 12'b000011110000;
+            end
+            2'b01 : begin
+                mpd_vram_wr_data = 2'b01;
+                draw_vga = 12'b111100001111;
+            end
+            2'b10 : begin
+                mpd_vram_wr_data = 2'b11;
+                draw_vga = 12'b111111111111;
+            end
+            default : begin
+            
+            end
+        endcase
         if (sw_i[3]) begin
             mpd_vram_wr_data = 2'b10;
             draw_vga = 12'b000011110000;

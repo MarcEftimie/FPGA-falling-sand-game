@@ -27,8 +27,11 @@ module cells_next_state
         IDLE,
         PIXEL_EMPTY,
         PIXEL_DOWN,
+        PIXEL_UP,
         PIXEL_DOWN_LEFT,
         PIXEL_DOWN_RIGHT,
+        PIXEL_UP_LEFT,
+        PIXEL_UP_RIGHT,
         PIXEL_LEFT,
         PIXEL_RIGHT,
         DELETE_PIXEL,
@@ -49,7 +52,8 @@ module cells_next_state
     logic [2:0] pixel_surrounding_state_reg, pixel_surrounding_state_next;
 
     logic [2:0] random_counter_reg, random_counter_next;
-    logic down_random, left_down_random, right_down_random, left_random, right_random;
+    logic down_random, up_random, left_down_random, left_up_random, right_down_random, right_up_random,
+          left_random, right_random;
     
     always_ff @(posedge clk_i, posedge reset_i) begin
         if (reset_i) begin
@@ -103,8 +107,11 @@ module cells_next_state
         done = 0;
 
         down_random = 0;
+        up_random = 0;
         left_down_random = 0;
         right_down_random = 0;
+        left_up_random = 0;
+        right_up_random = 0;
         left_random = 0;
         right_random = 0;
 
@@ -130,6 +137,10 @@ module cells_next_state
                     vram_rd_address = base_address_next;
                     ram_rd_address = vram_rd_address;
                     state_next = PIXEL_EMPTY;
+                end else if (vram_rd_data == 2'b11) begin
+                    vram_rd_address = base_address_reg - COLUMNS;
+                    ram_rd_address = base_address_reg - COLUMNS;
+                    state_next = PIXEL_UP;
                 end else begin
                     // Check pixel down
                     vram_rd_address = base_address_reg + COLUMNS;
@@ -161,6 +172,22 @@ module cells_next_state
                     vram_rd_address = base_address_reg + COLUMNS - 1;
                     ram_rd_address = base_address_reg + COLUMNS - 1;
                     state_next = PIXEL_DOWN_LEFT;
+                end
+            end
+            PIXEL_UP : begin
+                pixel_surrounding_state_next[0] = (|vram_rd_data) | (|ram_rd_data);
+                if ((base_address_reg - COLUMNS) > (COLUMNS*ROWS)) begin
+                    // Pixel on top layer
+                    base_address_next = base_address_reg + 1;
+                    vram_rd_address = base_address_next;
+                    ram_wr_address = base_address_reg;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
+                end else begin
+                    // Check pixel up
+                    vram_rd_address = base_address_reg - COLUMNS - 1;
+                    ram_rd_address = base_address_reg - COLUMNS - 1;
+                    state_next = PIXEL_UP_LEFT;
                 end
             end
             SWAP_PIXEL : begin
@@ -288,6 +315,112 @@ module cells_next_state
                         ram_wr_en = 1;
                         state_next = PIXEL_EMPTY;
                     end
+                end
+            end
+            PIXEL_UP_LEFT : begin
+                pixel_surrounding_state_next[1] = ((|vram_rd_data) | (|ram_rd_data));
+                vram_rd_address = base_address_reg - COLUMNS + 1;
+                ram_rd_address = base_address_reg - COLUMNS + 1;
+                state_next = PIXEL_UP_RIGHT;
+            end
+            PIXEL_UP_RIGHT : begin
+                pixel_surrounding_state_next[2] = ((|vram_rd_data) | (|ram_rd_data));
+                case (pixel_surrounding_state_next)
+                    3'b000 : begin
+                        if ((random_counter_reg == 0) ||
+                            (random_counter_reg == 1) || 
+                            (random_counter_reg == 2) || 
+                            (random_counter_reg == 3) || 
+                            (random_counter_reg == 4) || 
+                            (random_counter_reg == 5)) begin
+                            up_random = 1;
+                        end else if (random_counter_reg == 6) begin
+                            left_up_random = 1;
+                        end else begin
+                            right_up_random = 1;
+                        end
+                    end
+                    // Up
+                    3'b001 : begin
+                        if ((random_counter_reg == 0) ||
+                            (random_counter_reg == 1) || 
+                            (random_counter_reg == 2) || 
+                            (random_counter_reg == 3)) begin
+                            up_random = 1;
+                        end else begin
+                            right_up_random = 1;
+                        end
+                    end
+                    // Up Left
+                    3'b010 : begin
+                        if ((random_counter_reg == 0) || 
+                        (random_counter_reg == 1) || 
+                        (random_counter_reg == 2) || 
+                        (random_counter_reg == 3) || 
+                        (random_counter_reg == 4) ||
+                        (random_counter_reg == 5)) begin
+                            up_random = 1;
+                        end else begin
+                            right_up_random = 1;
+                        end
+                    end
+                    // Up, Up Left
+                    3'b011 : begin
+                        right_up_random = 1;
+                    end
+                    // Up Right
+                    3'b100 : begin
+                        if ((random_counter_reg == 0) || 
+                        (random_counter_reg == 1) || 
+                        (random_counter_reg == 2) || 
+                        (random_counter_reg == 3) || 
+                        (random_counter_reg == 4) ||
+                        (random_counter_reg == 5)) begin
+                            up_random = 1;
+                        end else begin
+                            left_up_random = 1;                        
+                        end
+                    end
+                    // Up, Up Right
+                    3'b101 : begin
+                        left_up_random = 1;
+                    end
+                    // Up Left, Up Right
+                    3'b110 : begin
+                        up_random = 1;
+                    end
+                    default : ;
+                endcase
+
+                // Move pixel to next location
+                if (up_random) begin
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg - COLUMNS;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
+                    state_next = DELETE_PIXEL;
+                end else if (left_up_random) begin
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_address = base_address_reg - COLUMNS - 1;
+                    ram_wr_data = base_pixel_state_reg;
+                    ram_wr_en = 1;
+                    state_next = DELETE_PIXEL;
+                end else if (right_up_random) begin
+                    vram_wr_address = base_address_reg;
+                    vram_wr_data = 0;
+                    vram_wr_en = 1;
+                    ram_wr_en = 1;
+                    ram_wr_address = base_address_reg - COLUMNS + 1;
+                    ram_wr_data = base_pixel_state_reg;
+                    state_next = DELETE_PIXEL;
+                end else begin
+                    vram_rd_address = base_address_reg - 1;
+                    ram_rd_address = base_address_reg - 1;
+                    state_next = PIXEL_LEFT;
                 end
             end
             PIXEL_LEFT : begin
