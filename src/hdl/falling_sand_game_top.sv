@@ -150,27 +150,66 @@ module falling_sand_game_top
         .cursor_draw_o(cursor_draw)
     );
 
+    logic change_pixel_type;
+
+    debouncer MOUSE_RIGHT_DEBOUNCER(
+        .clk_i(clk_i),
+        .btn_i(mouse_btn[1]),
+        .pulse_o(change_pixel_type)
+    );
+
+    logic [1:0] pixel_type_reg, pixel_type_next;
+
+    always_ff @(posedge clk_i, posedge reset_i) begin
+        if (reset_i) begin
+            pixel_type_reg <= 0;
+        end else begin
+            pixel_type_reg <= pixel_type_next;
+        end
+    end
+
+    assign pixel_type_next = change_pixel_type ? pixel_type_reg + 1 : pixel_type_reg;
+
     logic cursor_draw_en;
     logic [11:0] draw_vga;
     logic [11:0] game_vga;
 
     always_comb begin
-        case (sw_i[4:3])
+        // case (sw_i[4:3])
+        //     2'b00 : begin
+        //         mpd_vram_wr_data = 2'b10;
+        //         draw_vga = 12'b000011110000;
+        //     end
+        //     2'b01 : begin
+        //         mpd_vram_wr_data = 2'b01;
+        //         draw_vga = 12'b111100001111;
+        //     end
+        //     2'b10 : begin
+        //         mpd_vram_wr_data = 2'b11;
+        //         draw_vga = 12'b111111111111;
+        //     end
+        //     default : begin
+            
+        //     end
+        // endcase
+        case (pixel_type_reg)
             2'b00 : begin
-                mpd_vram_wr_data = 2'b10;
-                draw_vga = 12'b000011110000;
+                mpd_vram_wr_data = 2'b00;
+                draw_vga = 12'b000000000000;
             end
             2'b01 : begin
                 mpd_vram_wr_data = 2'b01;
                 draw_vga = 12'b111100001111;
             end
+            2'b01 : begin
+                mpd_vram_wr_data = 2'b10;
+                draw_vga = 12'b000011110000;
+            end
             2'b10 : begin
                 mpd_vram_wr_data = 2'b11;
                 draw_vga = 12'b111111111111;
             end
-            default : begin
-            
-            end
+            default : ;
         endcase
         if (sw_i[3]) begin
             mpd_vram_wr_data = 2'b10;
