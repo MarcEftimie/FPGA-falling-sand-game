@@ -175,23 +175,6 @@ module falling_sand_game_top
     logic [11:0] game_vga;
 
     always_comb begin
-        // case (sw_i[4:3])
-        //     2'b00 : begin
-        //         mpd_vram_wr_data = 2'b10;
-        //         draw_vga = 12'b000011110000;
-        //     end
-        //     2'b01 : begin
-        //         mpd_vram_wr_data = 2'b01;
-        //         draw_vga = 12'b111100001111;
-        //     end
-        //     2'b10 : begin
-        //         mpd_vram_wr_data = 2'b11;
-        //         draw_vga = 12'b111111111111;
-        //     end
-        //     default : begin
-            
-        //     end
-        // endcase
         case (pixel_type_reg)
             2'b00 : begin
                 mpd_vram_wr_data = 2'b00;
@@ -201,28 +184,22 @@ module falling_sand_game_top
                 mpd_vram_wr_data = 2'b01;
                 draw_vga = 12'b111100001111;
             end
-            2'b01 : begin
+            2'b10 : begin
                 mpd_vram_wr_data = 2'b10;
                 draw_vga = 12'b000011110000;
             end
-            2'b10 : begin
+            2'b11 : begin
                 mpd_vram_wr_data = 2'b11;
                 draw_vga = 12'b111111111111;
             end
             default : ;
         endcase
-        if (sw_i[3]) begin
-            mpd_vram_wr_data = 2'b10;
-            draw_vga = 12'b000011110000;
-        end else begin
-            mpd_vram_wr_data = 2'b01;
-            draw_vga = 12'b111100001111;
-        end
 
         case (vram_rd_data_1)
             2'b00 : game_vga = 12'b0;
             2'b01 : game_vga = 12'b111100001111;
             2'b10 : game_vga = 12'b000011110000;
+            2'b11 : game_vga = 12'b111111111111;
             default : game_vga = 12'b0;
         endcase
     end
@@ -252,6 +229,7 @@ module falling_sand_game_top
     assign vga_blue_o = video_en ? (cursor_draw ? draw_vga[7:4] : game_vga[7:4]) : 4'h0;
     assign vga_green_o = video_en ? (cursor_draw ? draw_vga[3:0] : game_vga[3:0]) : 4'h0;
 
-    assign led_o = {mouse_x_position[6:0], mouse_y_position};
+    // assign led_o = {mouse_x_position[6:0], mouse_y_position};
+    assign led_o = {14'b0, pixel_type_reg};
 
 endmodule
