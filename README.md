@@ -21,6 +21,19 @@ constraint file (.xdc file) must be changed to accomodate the new platform.
 
 ## Game
 
+### Programming the FPGA
+
+1. Move into the FPGA_FALLING_SAND_GAME directory
+2. Follow the commands below.
+
+```bash
+cd src/
+
+make program_fpga_vivado
+```
+
+### Gameplay
+
 Use left click to place a sand particle.
 
 Use right click to change between sand, water, gas, and destroy cursor.
