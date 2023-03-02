@@ -158,7 +158,7 @@ module cells_next_state
                     ram_wr_data = base_pixel_state_reg;
                     ram_wr_en = 1;
                     state_next = PIXEL_EMPTY;
-                end if ((base_pixel_state_reg == 2'b01) && (vram_rd_data == 2'b10)) begin
+                end else if ((base_pixel_state_reg == 2'b01) && (vram_rd_data == 2'b10)) begin
                     // Sand above water
                     vram_wr_address = base_address_reg;
                     vram_wr_data = 0;
@@ -183,6 +183,7 @@ module cells_next_state
                     ram_wr_address = base_address_reg;
                     ram_wr_data = base_pixel_state_reg;
                     ram_wr_en = 1;
+                    state_next = PIXEL_EMPTY;
                 end else begin
                     // Check pixel up
                     vram_rd_address = base_address_reg - COLUMNS - 1;

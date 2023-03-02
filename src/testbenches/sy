@@ -1,14 +1,14 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Thu Feb 23 05:09:53 2023
+[*] Thu Mar  2 17:54:45 2023
 [*]
 [dumpfile] "/home/marc/projects/FPGA_Falling_Sand_Game/src/falling_sand_game_top.fst"
-[dumpfile_mtime] "Thu Feb 23 05:09:23 2023"
-[dumpfile_size] 15237630
+[dumpfile_mtime] "Thu Mar  2 17:54:39 2023"
+[dumpfile_size] 15070846
 [savefile] "/home/marc/projects/FPGA_Falling_Sand_Game/src/testbenches/sy"
 [timestart] 0
-[size] 1920 1016
-[pos] -1 -1
+[size] 2560 1376
+[pos] -101 -101
 *-30.138752 1507000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] falling_sand_game_top_tb.
 [treeopen] falling_sand_game_top_tb.UUT.
@@ -16,7 +16,7 @@
 [sst_width] 233
 [signals_width] 318
 [sst_expanded] 1
-[sst_vpaned_height] 595
+[sst_vpaned_height] 854
 @200
 -fdsf
 @24
@@ -50,7 +50,6 @@ falling_sand_game_top_tb.UUT.ram_wr_address[17:0]
 falling_sand_game_top_tb.UUT.ram_wr_data[1:0]
 falling_sand_game_top_tb.UUT.ram_wr_en
 falling_sand_game_top_tb.UUT.reset_i
-falling_sand_game_top_tb.UUT.sw_i[3:0]
 falling_sand_game_top_tb.UUT.tick_10_ns[26:0]
 falling_sand_game_top_tb.UUT.vga_blue_o[3:0]
 falling_sand_game_top_tb.UUT.vga_green_o[3:0]
@@ -108,7 +107,6 @@ falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.vram_wr_en_o
 @200
 -dsad
 @25
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.LFSR[7:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.base_address_next[17:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.base_address_reg[17:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.base_pixel_state_next[1:0]
@@ -129,8 +127,6 @@ falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.ram_wr_data[
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.ram_wr_data_o[1:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.ram_wr_en
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.ram_wr_en_o
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.random_counter_next[1:0]
-falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.random_counter_reg[1:0]
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.ready_i
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.reset_i
 falling_sand_game_top_tb.UUT.GAME_STATE_CONTROLLER.CELLS_NEXT_STATE.right_down_random
